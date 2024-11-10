@@ -1,0 +1,154 @@
+from typing import Callable, Any, Optional, Union
+import numpy as np
+from numpy.typing import NDArray
+from scipy.stats import rv_continuous
+
+class DynamicalSystem:
+    """
+    A class representing a general dynamical system with state and measurement equations.
+    
+    This class encapsulates the dynamics, measurements, and associated probability
+    distributions for both state and measurement noise.
+    
+    Attributes
+    ----------
+    nx : int
+        Dimension of the state space.
+    ny : int
+        Dimension of the measurement/output space.
+    f : Callable
+        State transition function (dynamics).
+    g : Callable
+        Measurement/output function.
+    dist_X : rv_continuous
+        Probability distribution for initial states.
+    dist_dyn : rv_continuous
+        Probability distribution for dynamics noise.
+    dist_obs : rv_continuous
+        Probability distribution for measurement noise.
+        
+    Notes
+    -----
+    The functions f and g should have the following signatures:
+    - f(x: ndarray, w: ndarray) -> ndarray
+    - g(x: ndarray, v: ndarray) -> ndarray
+    where:
+    - x is the state vector
+    - w is the process noise
+    - v is the measurement noise
+    """
+    
+    def __init__(
+        self,
+        nx: int,
+        ny: int,
+        f: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
+        g: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
+        dist_X: rv_continuous,
+        dist_dyn: rv_continuous,
+        dist_obs: rv_continuous
+    ):
+        self.nx = nx
+        self.ny = ny
+        self.f = f
+        self.g = g
+        self.dist_X = dist_X
+        self.dist_dyn = dist_dyn
+        self.dist_obs = dist_obs
+        
+    def dynamics(self, x: NDArray[np.float64], w: NDArray[np.float64]) -> NDArray[np.float64]:
+        """
+        Apply the state transition function.
+        
+        Parameters
+        ----------
+        x : np.ndarray
+            Current state vector.
+        w : np.ndarray
+            Process noise vector.
+            
+        Returns
+        -------
+        np.ndarray
+            Next state vector.
+        """
+        return self.f(x, w)
+    
+    def measurements(self, x: NDArray[np.float64], v: NDArray[np.float64]) -> NDArray[np.float64]:
+        """
+        Apply the measurement function.
+        
+        Parameters
+        ----------
+        x : np.ndarray
+            Current state vector.
+        v : np.ndarray
+            Measurement noise vector.
+            
+        Returns
+        -------
+        np.ndarray
+            Measurement/output vector.
+        """
+        return self.g(x, v)
+    
+    def sample_initial_state(self, size: int = 1) -> NDArray[np.float64]:
+        """
+        Sample from the initial state distribution.
+        
+        Parameters
+        ----------
+        size : int, optional
+            Number of samples to draw. Default is 1.
+            
+        Returns
+        -------
+        np.ndarray
+            Sampled initial state(s).
+        """
+        return self.dist_X.rvs(size=size).reshape((size, self.nx))
+
+def create_additive_system(
+    nx: int,
+    ny: int,
+    f: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+    g: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+    dist_X: rv_continuous,
+    dist_dyn: rv_continuous,
+    dist_obs: rv_continuous
+) -> DynamicalSystem:
+    """
+    Create an additive dynamical system where noise is added to the state and observation functions.
+    
+    Parameters
+    ----------
+    nx : int
+        Dimension of the state space.
+    ny : int
+        Dimension of the measurement space.
+    f : Callable
+        State transition function (without noise).
+    g : Callable
+        Measurement function (without noise).
+    dist_X : rv_continuous
+        Initial state distribution.
+    dist_dyn : rv_continuous
+        Dynamics noise distribution.
+    dist_obs : rv_continuous
+        Measurement noise distribution.
+        
+    Returns
+    -------
+    DynamicalSystem
+        New dynamical system instance with additive noise.
+        
+    Notes
+    -----
+    The resulting system has the form:
+    x[k+1] = f(x[k]) + w[k]
+    y[k] = g(x[k]) + v[k]
+    where w and v are noise terms.
+    """
+    new_f = lambda x, w: f(x) + w
+    new_g = lambda x, v: g(x) + v
+    return DynamicalSystem(nx, ny, new_f, new_g, dist_X, dist_dyn, dist_obs)
