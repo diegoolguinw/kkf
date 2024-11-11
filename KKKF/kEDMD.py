@@ -2,7 +2,7 @@ from typing import Callable, Any, Optional, Union
 import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import rv_continuous
-from DynamicalSystems import DynamicalSystem, create_additive_system
+from .DynamicalSystems import DynamicalSystem, create_additive_system
 
 class KoopmanOperator:
     """

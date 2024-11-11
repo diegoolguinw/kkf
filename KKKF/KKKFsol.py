@@ -8,7 +8,7 @@ from numpy.linalg import pinv, cholesky
 from typing import Any, Tuple, Optional, Callable
 from numpy.typing import NDArray
 
-from covariances import compute_initial_covariance, compute_dynamics_covariance, compute_observation_covariance
+from .covariances import compute_initial_covariance, compute_dynamics_covariance, compute_observation_covariance
 
 @dataclass
 class KoopmanKalmanFilterSolution:
