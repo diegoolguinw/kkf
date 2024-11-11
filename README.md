@@ -14,10 +14,9 @@ pip install KKKF
 
 - Kernel-based Extended Dynamic Mode Decomposition (EDMD)
 - Non-linear Kalman Filter implementation
-- Support for dynamical systems
+- Support for general dynamical systems
 - Integration with various kernel functions (e.g., Matérn kernel)
 - Robust state estimation with noise handling
-- Visualization tools with confidence intervals
 
 ## Dependencies
 
