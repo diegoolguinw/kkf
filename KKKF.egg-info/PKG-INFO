@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: KKKF
-Version: 0.2
+Version: 0.3
 Summary: KKKF: a library for Python implementation of Kernel-Koopman-Kalman Filter.
 Home-page: https://github.com/diegoolguinw/KKKF
 Author: Diego Olguin-Wende
