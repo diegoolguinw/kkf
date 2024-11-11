@@ -1,4 +1,4 @@
-# KKKF# KKKF - Kernel Koopman Kalman Filter
+# KKKF - Kernel Koopman Kalman Filter
 
 KKKF is a Python library that implements kernel Extended Dynamic Mode Decomposition (EDMD) of Koopman operators and provides a non-linear variant of the Kalman Filter. This library is particularly useful for state estimation in dynamical systems with non-linear behavior.
 

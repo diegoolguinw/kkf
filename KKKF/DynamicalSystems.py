@@ -42,8 +42,8 @@ class DynamicalSystem:
         self,
         nx: int,
         ny: int,
-        f: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
-        g: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
+        f: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+        g: Callable[[NDArray[np.float64]], NDArray[np.float64]],
         dist_X: rv_continuous,
         dist_dyn: rv_continuous,
         dist_obs: rv_continuous
@@ -72,7 +72,7 @@ class DynamicalSystem:
         np.ndarray
             Next state vector.
         """
-        return self.f(x, w)
+        return self.f(x) + w
     
     def measurements(self, x: NDArray[np.float64], v: NDArray[np.float64]) -> NDArray[np.float64]:
         """
@@ -90,7 +90,7 @@ class DynamicalSystem:
         np.ndarray
             Measurement/output vector.
         """
-        return self.g(x, v)
+        return self.g(x) + v
     
     def sample_initial_state(self, size: int = 1) -> NDArray[np.float64]:
         """
@@ -111,11 +111,12 @@ class DynamicalSystem:
 def create_additive_system(
     nx: int,
     ny: int,
-    f: Callable[[NDArray[np.float64]], NDArray[np.float64]],
-    g: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+    f: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
+    g: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
     dist_X: rv_continuous,
     dist_dyn: rv_continuous,
-    dist_obs: rv_continuous
+    dist_obs: rv_continuous,
+    N_samples: int
 ) -> DynamicalSystem:
     """
     Create an additive dynamical system where noise is added to the state and observation functions.
@@ -136,6 +137,8 @@ def create_additive_system(
         Dynamics noise distribution.
     dist_obs : rv_continuous
         Measurement noise distribution.
+    N_samples: int
+        Number of samples to generate empirical mean of dynamics and observation
         
     Returns
     -------
@@ -149,6 +152,6 @@ def create_additive_system(
     y[k] = g(x[k]) + v[k]
     where w and v are noise terms.
     """
-    new_f = lambda x, w: f(x) + w
-    new_g = lambda x, v: g(x) + v
+    new_f = lambda x: np.mean([f(x, w) for w in dist_dyn.rvs(N_samples)])
+    new_g = lambda x: np.mean([g(x, v) for v in dist_obs.rvs(N_samples)])
     return DynamicalSystem(nx, ny, new_f, new_g, dist_X, dist_dyn, dist_obs)

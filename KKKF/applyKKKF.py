@@ -66,8 +66,8 @@ def apply_koopman_kalman_filter(
     feature space (z), maintaining estimates and covariances in both spaces.
     """
     # Compute Koopman approximation
-    koopman_operator.kEDMD(n_features)
-    dynamical_system = koopman_operator.dyn_sys
+    koopman_operator.compute_edmd(n_features)
+    dynamical_system = koopman_operator.dynamical_system
 
     # Extract system and Koopman components
     state_dynamics = dynamical_system.f
@@ -167,7 +167,7 @@ def _prediction_step(
     )
     
     # Predict states
-    x_pred = state_dynamics(x_prev)
+    x_pred = state_dynamics(x_prev, )
     z_pred = phi(x_pred)
     
     # Predict covariance
