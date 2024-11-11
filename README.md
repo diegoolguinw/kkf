@@ -31,6 +31,7 @@ pip install KKKF
 Here's a complete example of using KKKF to estimate and visualize states in a SIR (Susceptible-Infected-Recovered) model:
 
 ```python
+# Dependencies
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -46,6 +47,7 @@ beta, gamma = 0.12, 0.04
 def f(x):
     return x + np.array([-beta*x[0]*x[1], beta*x[0]*x[1] - gamma*x[1], gamma*x[1]])
 
+# Define system observations
 def g(x):
     return np.array([x[1]])
 
@@ -76,10 +78,15 @@ for i in range(1, iters):
     y[i] = g(x[i]) + obs_dist.rvs()
 
 # Initialize and apply Koopman Kalman Filter
+
+# Prior for the initial condition
 x0_prior = np.array([0.8, 0.15, 0.05])
 d0 = stats.multivariate_normal(mean=x0_prior, cov=0.1*np.eye(3))
 
+# Koopman operator
 Koop = KoopmanOperator(k, dyn)
+
+# Solution
 sol = apply_koopman_kalman_filter(Koop, y, d0, N, noise_samples=100)
 
 # Visualization with confidence intervals
@@ -87,10 +94,12 @@ conf = np.zeros((iters, nx))
 for i in range(iters):
     conf[i, :] = np.sqrt(np.diag(sol.Px_plus[i,:,:]))
 
+# 95% confidence interval
 err1 = sol.x_plus - 1.96*conf
 err2 = sol.x_plus + 1.96*conf
 
-labels = ["S (Real)", "I (Real)", "R (Real)"]
+# Plot elements
+labels = ["S (True)", "I (True)", "R (True)"]
 colors = ["blue", "red", "green"]
 
 plt.plot(sol.x_plus, label=["S (KKF)", "I (KKF)", "R (KKF)"])
@@ -100,8 +109,8 @@ for i in range(nx):
     plt.scatter(np.arange(iters), x[:,i], label=labels[i], color=colors[i], s=1.4)
 
 plt.xlabel("Days")
-plt.ylabel("Population")
-plt.title("KKF Estimation")
+plt.ylabel("Propotion of population")
+plt.title("KKKF Estimation")
 plt.legend()
 plt.show()
 ```
