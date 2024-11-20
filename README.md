@@ -56,9 +56,9 @@ nx, ny = 3, 1
 k = Matern(length_scale=N**(-1/nx), nu=0.5)
 
 # Setup distributions
-X_dist = stats.dirichlet(alpha=1*np.ones(nx))
-dyn_dist = stats.multivariate_normal(mean=np.zeros(3), cov=1e-5*np.eye(3))
-obs_dist = stats.multivariate_normal(mean=np.zeros(1), cov=1e-3*np.eye(1))
+X_dist = stats.dirichlet(alpha=np.ones(nx))
+dyn_dist = stats.multivariate_normal(mean=np.zeros(nx), cov=1e-5*np.eye(3))
+obs_dist = stats.multivariate_normal(mean=np.zeros(ny), cov=1e-3*np.eye(1))
 
 # Create dynamical system
 dyn = DynamicalSystem(nx, ny, f, g, X_dist, dyn_dist, obs_dist)
