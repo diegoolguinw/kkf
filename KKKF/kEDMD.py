@@ -67,7 +67,7 @@ class KoopmanOperator:
         Notes
         -----
         The method performs the following steps:
-        1. Generates dictionary points using the initial state distribution
+        1. Generates dictionary points using the state distribution
         2. Constructs the feature map using the kernel function
         3. Computes the Gram matrix and its inverse
         4. Constructs the Koopman operator approximation
@@ -78,7 +78,7 @@ class KoopmanOperator:
         nx, ny = self.dynamical_system.nx, self.dynamical_system.ny
         
         # Generate dictionary points
-        self.X = self.dynamical_system.sample_initial_state(n_features)
+        self.X = self.dynamical_system.sample_state(n_features)
         
         # Define feature map
         self.phi = lambda x: self.kernel_function(x, self.X).reshape((n_features,))
@@ -88,7 +88,7 @@ class KoopmanOperator:
         G_inv = np.linalg.inv(self.G)
         
         # Compute Koopman operator approximation
-        next_states = f(self.X.T).reshape((n_features, nx))
+        next_states = f(self.X.T).T
         self.U = self.kernel_function(self.X, next_states) @ G_inv
         
         # Compute output and state transformation matrices

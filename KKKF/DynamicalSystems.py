@@ -8,7 +8,15 @@ class DynamicalSystem:
     A class representing a general dynamical system with state and measurement equations.
     
     This class encapsulates the dynamics, measurements, and associated probability
-    distributions for both state and measurement noise.
+    distributions for both state and measurement noise. Can be considered as:
+
+    Discrete time: 
+        Dynamics: x_{k+1} = f(x_{k}) + w_{k}
+        Measurements: y_{k} = g(x_{k}) + v_{k}
+
+    Continous time:
+        Dynamics: x'(t) = f(x(t)) + w(t)
+        Measurements: y(t) = g(x(t)) + v(t)
     
     Attributes
     ----------
@@ -26,6 +34,8 @@ class DynamicalSystem:
         Probability distribution for dynamics noise.
     dist_obs : rv_continuous
         Probability distribution for measurement noise.
+    discrete_time : bool
+        Indicates if the system is in discrete time, if False the system is in continous time.
         
     Notes
     -----
@@ -46,7 +56,8 @@ class DynamicalSystem:
         g: Callable[[NDArray[np.float64]], NDArray[np.float64]],
         dist_X: rv_continuous,
         dist_dyn: rv_continuous,
-        dist_obs: rv_continuous
+        dist_obs: rv_continuous,
+        discrete_time: bool
     ):
         self.nx = nx
         self.ny = ny
@@ -55,6 +66,7 @@ class DynamicalSystem:
         self.dist_X = dist_X
         self.dist_dyn = dist_dyn
         self.dist_obs = dist_obs
+        self.discrete_time = discrete_time
         
     def dynamics(self, x: NDArray[np.float64], w: NDArray[np.float64]) -> NDArray[np.float64]:
         """
@@ -92,9 +104,9 @@ class DynamicalSystem:
         """
         return self.g(x) + v
     
-    def sample_initial_state(self, size: int = 1) -> NDArray[np.float64]:
+    def sample_state(self, size: int = 1) -> NDArray[np.float64]:
         """
-        Sample from the initial state distribution.
+        Sample from the state distribution.
         
         Parameters
         ----------
@@ -104,7 +116,7 @@ class DynamicalSystem:
         Returns
         -------
         np.ndarray
-            Sampled initial state(s).
+            Sampled state(s).
         """
         return self.dist_X.rvs(size=size).reshape((size, self.nx))
 
@@ -128,9 +140,9 @@ def create_additive_system(
     ny : int
         Dimension of the measurement space.
     f : Callable
-        State transition function (without noise).
+        State transition function (with noise).
     g : Callable
-        Measurement function (without noise).
+        Measurement function (with noise).
     dist_X : rv_continuous
         Initial state distribution.
     dist_dyn : rv_continuous
