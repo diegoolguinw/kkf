@@ -13,6 +13,8 @@ def apply_koopman_kalman_filter(
     observations: NDArray[np.float64],
     initial_distribution: Any,
     n_features: int,
+    optimize: bool = True,
+    n_restarts_optimizer: int = 10,
     noise_samples: int = 100
 ) -> 'KoopmanKalmanFilterSolution':
     """
@@ -39,6 +41,10 @@ def apply_koopman_kalman_filter(
         - rvs: Random sampling method
     n_features : int
         Number of features in the lifted space.
+    optimize : bool, optional
+        Whether to optimize the kernel parameters. Default is True.
+    n_restarts_optimizer : int, optional
+        Number of restarts for kernel optimization. Default is 10.
     noise_samples : int, optional
         Number of samples for noise covariance estimation. Default is 100.
         
@@ -66,7 +72,7 @@ def apply_koopman_kalman_filter(
     feature space (z), maintaining estimates and covariances in both spaces.
     """
     # Compute Koopman approximation
-    koopman_operator.compute_edmd(n_features)
+    koopman_operator.compute_edmd(n_features, optimize, n_restarts_optimizer)
     dynamical_system = koopman_operator.dynamical_system
 
     # Extract system and Koopman components

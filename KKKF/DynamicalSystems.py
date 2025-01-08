@@ -128,7 +128,8 @@ def create_additive_system(
     dist_X: rv_continuous,
     dist_dyn: rv_continuous,
     dist_obs: rv_continuous,
-    N_samples: int
+    N_samples: int,
+    discrete_time: bool = True
 ) -> DynamicalSystem:
     """
     Create an additive dynamical system where noise is added to the state and observation functions.
@@ -150,7 +151,9 @@ def create_additive_system(
     dist_obs : rv_continuous
         Measurement noise distribution.
     N_samples: int
-        Number of samples to generate empirical mean of dynamics and observation
+        Number of samples to generate empirical mean of dynamics and observation.
+    discrete_time : bool, optional
+        Indicates if the system is in discrete time. Default is True.
         
     Returns
     -------
@@ -164,6 +167,19 @@ def create_additive_system(
     y[k] = g(x[k]) + v[k]
     where w and v are noise terms.
     """
-    new_f = lambda x: np.mean([f(x, w) for w in dist_dyn.rvs(N_samples)])
-    new_g = lambda x: np.mean([g(x, v) for v in dist_obs.rvs(N_samples)])
-    return DynamicalSystem(nx, ny, new_f, new_g, dist_X, dist_dyn, dist_obs)
+    new_f = lambda x: np.mean([f(x.reshape((len(x),1)), dist_dyn.rvs(N_samples))], axis=1)
+    new_g = lambda x: np.mean([g(x.reshape((len(x),1)), dist_obs.rvs(N_samples))], axis=1)
+    class DynDist:
+        def __init__(self):
+            pass
+
+        def rvs(self, x, size=1):
+            return f(x, dist_dyn.rvs(size=size)) - new_f(x)
+        
+    class ObsDist:
+        def __init__(self):
+            pass
+
+        def rvs(self, x, size=1):
+            return g(x, dist_obs.rvs(size=size)) - new_g(x)
+    return DynamicalSystem(nx, ny, new_f, new_g, dist_X, DynDist, ObsDist, discrete_time=discrete_time)
