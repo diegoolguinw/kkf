@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="KKKF",
+    name="kkf",
     version="0.11",
     packages=find_packages(),
     install_requires=[
@@ -11,10 +11,10 @@ setup(
     ],
     author="Diego Olguin-Wende",
     author_email="dolguin@dim.uchile.cl",  
-    description="KKKF: a library for Python implementation of Kernel-Koopman-Kalman Filter.",
+    description="kkf: a library for Python implementation of Kernel-Koopman-Kalman Filter.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/diegoolguinw/KKKF",  
+    url="https://github.com/diegoolguinw/kkf",  
     classifiers=[                      
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

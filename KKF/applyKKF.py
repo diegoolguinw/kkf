@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from typing import Any, Tuple, Optional, Callable
 
 from .covariances import compute_initial_covariance, compute_dynamics_covariance, compute_observation_covariance
-from .KKKFsol import KoopmanKalmanFilterSolution
+from .KKFsol import KoopmanKalmanFilterSolution
 
 def apply_koopman_kalman_filter(
     koopman_operator: Any,
