@@ -1,13 +1,13 @@
 # Kernel Koopman Kalman Filter
 
-KKKF is a Python library that implements kernel Extended Dynamic Mode Decomposition (EDMD) of Koopman operators and provides a non-linear variant of the Kalman Filter. This library is particularly useful for state estimation in dynamical systems with non-linear behavior.
+KKF is a Python library that implements kernel Extended Dynamic Mode Decomposition (EDMD) of Koopman operators and provides a non-linear variant of the Kalman Filter. This library is particularly useful for state estimation in dynamical systems with non-linear behavior.
 
 ## Installation
 
-You can install KKKF using pip:
+You can install kkf using pip:
 
 ```bash
-pip install KKKF
+pip install kkf
 ```
 
 ## Features
@@ -35,9 +35,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern
-from KKKF.DynamicalSystems import DynamicalSystem
-from KKKF.kEDMD import KoopmanOperator
-from KKKF.applyKKKF import apply_koopman_kalman_filter
+from kkf.DynamicalSystems import DynamicalSystem
+from kkf.kEDMD import KoopmanOperator
+from kkf.applyKKF import apply_koopman_kalman_filter
 
 # Define system parameters
 beta, gamma = 0.12, 0.04
@@ -177,10 +177,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 If you use this library in your research, please cite:
 
 ```bibtex
-@software{kkkf,
-  title = {KKKF: Kernel Koopman Kalman Filter},
+@software{kkf,
+  title = {kerKKF: Kernel Koopman Kalman Filter},
   year = {2024},
   author = {Diego Olguín-Wende},
-  url = {https://github.com/diegoolguinw/KKKF}
+  url = {https://github.com/diegoolguinw/kkf}
 }
 ```
