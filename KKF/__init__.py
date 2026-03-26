@@ -14,10 +14,9 @@ Main Components
 
 Quick Start
 -----------
->>> from KKF import DynamicalSystem, KoopmanOperator
->>> from KKF.applyKKF import apply_koopman_kalman_filter
+>>> from KKF import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
 >>> # or
->>> from KKF.filter import apply_koopman_kalman_filter  # recommended name
+>>> from KKF.filter import apply_koopman_kalman_filter
 """
 
 # Core classes and utilities
@@ -33,9 +32,6 @@ from .solution import KoopmanKalmanFilterSolution
 # Main filtering function
 from .filter import apply_koopman_kalman_filter
 
-# For backward compatibility, also provide old import paths
-from . import applyKKF, DynamicalSystems, kEDMD, KKFsol
-
 __all__ = [
     # Classes
     "DynamicalSystem",
@@ -47,11 +43,6 @@ __all__ = [
     "compute_initial_covariance",
     "compute_dynamics_covariance",
     "compute_observation_covariance",
-    # Backward compatibility modules
-    "applyKKF",
-    "DynamicalSystems",
-    "kEDMD",
-    "KKFsol",
 ]
 
 __version__ = "0.2.0"
