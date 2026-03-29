@@ -21,16 +21,16 @@ Quick Start
 
 # Core classes and utilities
 from .covariances import (
-    compute_initial_covariance,
     compute_dynamics_covariance,
+    compute_initial_covariance,
     compute_observation_covariance,
 )
-from .systems import DynamicalSystem, create_additive_system
-from .koopman import KoopmanOperator
-from .solution import KoopmanKalmanFilterSolution
 
 # Main filtering function
 from .filter import apply_koopman_kalman_filter
+from .koopman import KoopmanOperator
+from .solution import KoopmanKalmanFilterSolution
+from .systems import DynamicalSystem, create_additive_system
 
 __all__ = [
     # Classes

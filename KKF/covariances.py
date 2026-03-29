@@ -1,21 +1,23 @@
+from typing import Any, Callable, Union
+
 import numpy as np
-from typing import Callable, Any, Union
-from scipy.stats import rv_continuous
 from numpy.typing import NDArray
+from scipy.stats import rv_continuous
+
 
 def compute_initial_covariance(
     x: NDArray[np.float64],
     n_features: int,
     initial_distribution: rv_continuous,
     koopman_operator: Any,
-    n_samples: int
+    n_samples: int,
 ) -> NDArray[np.float64]:
     """
     Compute the covariance matrix for the initial distribution in feature space.
-    
+
     This function samples from an initial distribution and computes the covariance
     matrix of the transformed samples using a Koopman operator's feature map.
-    
+
     Parameters
     ----------
     x : np.ndarray
@@ -29,12 +31,12 @@ def compute_initial_covariance(
         Must have a method phi(x) that maps states to feature space.
     n_samples : int
         Number of samples to use for covariance estimation.
-        
+
     Returns
     -------
     np.ndarray
         Covariance matrix of size (n_features, n_features) in the transformed space.
-        
+
     Notes
     -----
     The function performs the following steps:
@@ -44,30 +46,27 @@ def compute_initial_covariance(
     """
     # Sample from initial distribution
     samples = initial_distribution.rvs(size=n_samples).reshape((n_samples, len(x)))
-    
+
     # Initialize array for transformed samples
     transformed_samples = np.zeros((n_samples, n_features))
-    
+
     # Transform each sample using the feature map
     for i in range(n_samples):
-        transformed_samples[i, :] = koopman_operator.phi(samples[i,:])
-    
+        transformed_samples[i, :] = koopman_operator.phi(samples[i, :])
+
     # Compute and return covariance matrix
     return np.cov(transformed_samples, rowvar=False)
 
+
 def compute_dynamics_covariance(
-    x: NDArray[np.float64],
-    n_features: int,
-    dynamics: Any,
-    koopman_operator: Any,
-    n_samples: int
+    x: NDArray[np.float64], n_features: int, dynamics: Any, koopman_operator: Any, n_samples: int
 ) -> NDArray[np.float64]:
     """
     Compute the covariance matrix for the system dynamics in feature space.
-    
+
     This function samples from the dynamics distribution, applies the system
     dynamics, and computes the covariance matrix of the transformed results.
-    
+
     Parameters
     ----------
     x : np.ndarray
@@ -83,12 +82,12 @@ def compute_dynamics_covariance(
         Must have a method phi(x) that maps states to feature space.
     n_samples : int
         Number of samples to use for covariance estimation.
-        
+
     Returns
     -------
     np.ndarray
         Covariance matrix of size (n_features, n_features) in the transformed space.
-        
+
     Notes
     -----
     The function performs the following steps:
@@ -99,30 +98,28 @@ def compute_dynamics_covariance(
     """
     # Sample from dynamics distribution
     noise_samples = dynamics.dist_dyn.rvs(size=n_samples).reshape((n_samples, len(x)))
-    
+
     # Initialize array for transformed samples
     transformed_samples = np.zeros((n_samples, n_features))
-    
+
     # Apply dynamics and transform each sample
     for i in range(n_samples):
-        state_evolution = dynamics.dynamics(x, noise_samples[i,:])
+        state_evolution = dynamics.dynamics(x, noise_samples[i, :])
         transformed_samples[i, :] = koopman_operator.phi(state_evolution)
-    
+
     # Compute and return covariance matrix
     return np.cov(transformed_samples, rowvar=False)
 
+
 def compute_observation_covariance(
-    x: NDArray[np.float64],
-    n_outputs: int,
-    dynamics: Any,
-    n_samples: int
+    x: NDArray[np.float64], n_outputs: int, dynamics: Any, n_samples: int
 ) -> NDArray[np.float64]:
     """
     Compute the covariance matrix for the observation/measurement process.
-    
+
     This function samples from the measurement noise distribution and computes
     the covariance matrix of the measurement process.
-    
+
     Parameters
     ----------
     x : np.ndarray
@@ -135,12 +132,12 @@ def compute_observation_covariance(
         - measurements(x, w): method implementing the measurement process
     n_samples : int
         Number of samples to use for covariance estimation.
-        
+
     Returns
     -------
     np.ndarray
         Covariance matrix of size (n_outputs, n_outputs) for the measurement process.
-        
+
     Notes
     -----
     The function performs the following steps:
@@ -150,13 +147,13 @@ def compute_observation_covariance(
     """
     # Sample from measurement distribution
     noise_samples = dynamics.dist_obs.rvs(size=n_samples).reshape((n_samples, n_outputs))
-    
+
     # Initialize array for measurements
     measurement_samples = np.zeros((n_samples, n_outputs))
-    
+
     # Apply measurement function to each sample
     for i in range(n_samples):
-        measurement_samples[i, :] = dynamics.measurements(x, noise_samples[i,:])
-    
-    # Compute and return covariance matrix
-    return np.cov(measurement_samples, rowvar=False)
+        measurement_samples[i, :] = dynamics.measurements(x, noise_samples[i, :])
+
+    # Compute and return covariance matrix (ensure 2D even for single output)
+    return np.atleast_2d(np.cov(measurement_samples, rowvar=False))

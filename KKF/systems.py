@@ -4,7 +4,8 @@ Defines classes and utilities for representing general dynamical systems
 with state transitions and measurement functions.
 """
 
-from typing import Callable, Any, Optional
+from typing import Any, Callable, Optional
+
 import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import rv_continuous
@@ -13,18 +14,18 @@ from scipy.stats import rv_continuous
 class DynamicalSystem:
     """
     A class representing a general dynamical system with state and measurement equations.
-    
+
     This class encapsulates the dynamics, measurements, and associated probability
     distributions for both state and measurement noise. Can be considered as:
 
-    Discrete time: 
+    Discrete time:
         Dynamics: x_{k+1} = f(x_{k}) + w_{k}
         Measurements: y_{k} = g(x_{k}) + v_{k}
 
     Continous time:
         Dynamics: x'(t) = f(x(t)) + w(t)
         Measurements: y(t) = g(x(t)) + v(t)
-    
+
     Attributes
     ----------
     nx : int
@@ -43,7 +44,7 @@ class DynamicalSystem:
         Probability distribution for measurement noise.
     discrete_time : bool
         Indicates if the system is in discrete time, if False the system is in continous time.
-        
+
     Notes
     -----
     The functions f and g should have the following signatures:
@@ -54,7 +55,7 @@ class DynamicalSystem:
     - w is the process noise
     - v is the measurement noise
     """
-    
+
     def __init__(
         self,
         nx: int,
@@ -66,6 +67,8 @@ class DynamicalSystem:
         dist_obs: rv_continuous,
         discrete_time: bool,
     ) -> None:
+        if nx <= 0:
+            raise ValueError(f"State dimension nx must be positive, got {nx}")
         self.nx = nx
         self.ny = ny
         self.f = f
@@ -74,52 +77,52 @@ class DynamicalSystem:
         self.dist_dyn = dist_dyn
         self.dist_obs = dist_obs
         self.discrete_time = discrete_time
-        
+
     def dynamics(self, x: NDArray[np.float64], w: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         Apply the state transition function.
-        
+
         Parameters
         ----------
         x : np.ndarray
             Current state vector.
         w : np.ndarray
             Process noise vector.
-            
+
         Returns
         -------
         np.ndarray
             Next state vector.
         """
         return self.f(x) + w
-    
+
     def measurements(self, x: NDArray[np.float64], v: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         Apply the measurement function.
-        
+
         Parameters
         ----------
         x : np.ndarray
             Current state vector.
         v : np.ndarray
             Measurement noise vector.
-            
+
         Returns
         -------
         np.ndarray
             Measurement/output vector.
         """
         return self.g(x) + v
-    
+
     def sample_state(self, size: int = 1) -> NDArray[np.float64]:
         """
         Sample from the state distribution.
-        
+
         Parameters
         ----------
         size : int, optional
             Number of samples to draw. Default is 1.
-            
+
         Returns
         -------
         np.ndarray
@@ -141,7 +144,7 @@ def create_additive_system(
 ) -> DynamicalSystem:
     """
     Create an additive dynamical system where noise is added to the state and observation functions.
-    
+
     Parameters
     ----------
     nx : int
@@ -162,12 +165,12 @@ def create_additive_system(
         Number of samples to generate empirical mean of dynamics and observation.
     discrete_time : bool, optional
         Indicates if the system is in discrete time. Default is True.
-        
+
     Returns
     -------
     DynamicalSystem
         New dynamical system instance with additive noise.
-        
+
     Notes
     -----
     The resulting system has the form:
@@ -177,21 +180,21 @@ def create_additive_system(
     """
     new_f = lambda x: np.mean([f(x.reshape((len(x), 1)), dist_dyn.rvs(N_samples))], axis=1)
     new_g = lambda x: np.mean([g(x.reshape((len(x), 1)), dist_obs.rvs(N_samples))], axis=1)
-    
+
     class DynDist:
         def __init__(self) -> None:
             pass
 
         def rvs(self, x: NDArray[np.float64], size: int = 1) -> NDArray[np.float64]:
             return f(x, dist_dyn.rvs(size=size)) - new_f(x)
-        
+
     class ObsDist:
         def __init__(self) -> None:
             pass
 
         def rvs(self, x: NDArray[np.float64], size: int = 1) -> NDArray[np.float64]:
             return g(x, dist_obs.rvs(size=size)) - new_g(x)
-    
+
     return DynamicalSystem(
         nx, ny, new_f, new_g, dist_X, DynDist(), ObsDist(), discrete_time=discrete_time
     )

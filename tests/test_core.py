@@ -14,7 +14,7 @@ from KKF import (
     compute_dynamics_covariance,
     compute_observation_covariance,
 )
-from KKF.applyKKF import apply_koopman_kalman_filter
+from KKF.filter import apply_koopman_kalman_filter
 
 
 class TestDynamicalSystem:

@@ -80,15 +80,14 @@ pip install kkf[all]
 
 ## Quick Start
 
-Here's a complete example of using KKF to estimate states in a SIR (Susceptible-Infected-Recovered) epidemiological model:
+Here's a complete example of using KKF to estimate states in a SIR (Susceptible-Infected-Recovered) epidemiological model (see also [`examples/02_sir_epidemic_model.py`](examples/02_sir_epidemic_model.py)):
 
 ```python
 import numpy as np
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern
 
-from KKF import DynamicalSystem, KoopmanOperator
-from KKF.applyKKF import apply_koopman_kalman_filter
+from KKF import systems, koopman, filter
 
 # Define SIR dynamics
 beta, gamma = 0.12, 0.04
@@ -100,7 +99,7 @@ def f(x):  # State transition
         gamma * x[1]
     ])
 
-def g(x):  # Observation (infected population)
+def g(x):  # Observation function (infected population)
     return np.array([x[1]])
 
 # Setup system
@@ -133,8 +132,9 @@ solution = apply_koopman_kalman_filter(
 )
 
 # Access results
-print(f"Estimated states: {solution.x_plus.shape}")  # (n_timesteps, nx)
-print(f"State covariances: {solution.Px_plus.shape}")  # (n_timesteps, nx, nx)
+print(f"State estimates shape: {solution.x_plus.shape}")  # (n_timesteps, nx)
+print(f"State covariances shape: {solution.Px_plus.shape}")  # (n_timesteps, nx, nx)
+print(f"Mean estimation error: {solution.get_estimation_error().mean():.6f}")
 ```
 
 ## Examples
@@ -180,7 +180,7 @@ For more details, see [examples/README.md](examples/README.md)
 ```python
 # Core classes
 from KKF import DynamicalSystem, KoopmanOperator, KoopmanKalmanFilterSolution
-from KKF.applyKKF import apply_koopman_kalman_filter
+from KKF.filter import apply_koopman_kalman_filter
 
 # Utility functions
 from KKF import (
@@ -277,16 +277,6 @@ pytest tests/ -m "not slow"
 pytest tests/ --cov=KKF --cov-report=html
 ```
 
-## Performance
-
-Recommended configurations:
-
-| System Size | State Dim | Features | Notes |
-|------------|-----------|----------|-------|
-| Small | 1-3 | 10-20 | Fast, real-time capable |
-| Medium | 3-10 | 20-50 | Moderate, seconds per filter run |
-| Large | 10-50 | 50-100 | Slow, minutes per filter run |
-
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to:
@@ -320,111 +310,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
-## Acknowledgments
-
-- Koopman operator theory foundations
-- Extended Dynamic Mode Decomposition methodology
-- Kalman filtering research community
-
 ## Support & Contact
 
 - **Issues & Bug Reports**: [GitHub Issues](https://github.com/diegoolguinw/kkf/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/diegoolguinw/kkf/discussions)
 - **Email**: dolguin@dim.uchile.cl
-
-## References
-
-Key papers and resources:
-- Koopman, B. O. (1931). "Hamiltonian systems and transformation in Hilbert space"
-- Williams, M. O., et al. (2015). "A data-driven approximation of the koopman operator"
-- Korda, M., & Mezić, I. (2018). "Linear predictors for nonlinear dynamical systems"
-
----
-
-**Made with ❤️ for the scientific computing community**
-labels = ["S (True)", "I (True)", "R (True)"]
-colors = ["blue", "red", "green"]
-
-plt.plot(sol.x_plus, label=["S (KKF)", "I (KKF)", "R (KKF)"])
-
-for i in range(nx):
-    plt.fill_between(np.arange(iters), err1[:,i], err2[:,i], alpha=0.6)
-    plt.scatter(np.arange(iters), x[:,i], label=labels[i], color=colors[i], s=1.4)
-
-plt.xlabel("Days")
-plt.ylabel("Propotion of population")
-plt.title("KKKF Estimation")
-plt.legend()
-plt.show()
-```
-
-## API Reference
-
-### DynamicalSystem
-
-```python
-DynamicalSystem(nx, ny, f, g, X_dist, dyn_dist, obs_dist)
-```
-Creates a dynamical system with:
-- `nx`: State dimension
-- `ny`: Observation dimension
-- `f`: State transition function
-- `g`: Observation function
-- `X_dist`: State distribution
-- `dyn_dist`: Dynamic noise distribution
-- `obs_dist`: Observation noise distribution
-
-### KoopmanOperator
-
-```python
-KoopmanOperator(kernel, dynamical_system)
-```
-Initializes a Koopman operator with:
-- `kernel`: Kernel function (e.g., Matérn kernel)
-- `dynamical_system`: Instance of DynamicalSystem
-
-### apply_koopman_kalman_filter
-
-```python
-apply_koopman_kalman_filter(koopman, observations, initial_distribution, N, noise_samples=100)
-```
-Applies the Koopman-based Kalman filter with:
-- `koopman`: KoopmanOperator instance
-- `observations`: Observation data
-- `initial_distribution`: Initial state distribution
-- `N`: Number of samples
-- `noise_samples`: Number of noise samples for uncertainty estimation
-
-Returns a solution object containing:
-- `x_plus`: State estimates
-- `Px_plus`: Covariance matrices
-- Additional filter statistics
-
-## Visualization
-
-The library supports visualization of results with confidence intervals. The example above demonstrates how to:
-- Plot state estimates
-- Add confidence intervals (shaded regions)
-- Compare with real data (if available)
-- Customize plot appearance
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Citation
-
-If you use this library in your research, please cite:
-
-```bibtex
-@software{kkf,
-  title = {kerKKF: Kernel Koopman Kalman Filter},
-  year = {2024},
-  author = {Diego Olguín-Wende},
-  url = {https://github.com/diegoolguinw/kkf}
-}
-```
