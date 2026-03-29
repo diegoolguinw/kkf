@@ -21,7 +21,7 @@ This enables accurate state estimation for highly nonlinear dynamical systems wh
 ## Features
 
 ✨ **Core Capabilities**
-- Kernel-based Extended Dynamic Mode Decomposition (kEDMD)
+- Kernel Extended Dynamic Mode Decomposition (kEDMD)
 - Non-linear Kalman Filter implementation
 - Support for arbitrary dynamical systems
 - Multiple kernel function options (RBF, Matérn, etc.)

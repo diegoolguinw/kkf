@@ -7,7 +7,7 @@ state estimation.
 from typing import Any, Callable, Tuple
 
 import numpy as np
-from numpy.linalg import cholesky, pinv
+from numpy.linalg import pinv
 from numpy.typing import NDArray
 
 from .covariances import (
@@ -229,7 +229,7 @@ def _update_step(
     S = C @ Pz_minus @ C.T + Rz
 
     # Compute Kalman gain
-    K = Pz_minus @ C.T @ pinv(cholesky(S))
+    K = Pz_minus @ C.T @ pinv(S)
 
     # Update states
     z_plus = z_minus + K @ innovation
