@@ -41,7 +41,7 @@ Your KKF (Kernel Koopman Kalman Filter) library has been comprehensively enhance
 
 **Workflows:**
 - `.github/workflows/tests.yml` - Test and lint pipeline
-- `.github/workflows/publish.yml` - Release distribution pipeline
+- `.github/workflows/python-publish.yml` - Release distribution pipeline
 
 ### ✅ 4. **Comprehensive Test Suite** (Complete)
 - ✓ 95+ unit and integration tests

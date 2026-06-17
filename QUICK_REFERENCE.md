@@ -304,8 +304,10 @@ python examples/01_basic_linear_system.py
 # Build package
 python -m build
 
-# Upload to PyPI (for maintainers)
-twine upload dist/*
+# Publish to PyPI (for maintainers)
+git tag vX.Y.Z
+git push origin vX.Y.Z
+# Or trigger .github/workflows/python-publish.yml manually from GitHub Actions
 ```
 
 ## Kernel Selection

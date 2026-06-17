@@ -356,7 +356,7 @@ Maintainers follow semantic versioning (Major.Minor.Patch):
 2. Update `CHANGELOG.md`
 3. Create release branch
 4. Tag release: `git tag vX.Y.Z`
-5. Build and publish to PyPI
+5. Push the tag and let GitHub Actions publish to PyPI
 
 ## Questions?
 

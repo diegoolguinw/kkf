@@ -262,7 +262,8 @@ git commit -m "Bump version to v0.3.0"
 # Create and push tag
 git tag v0.3.0
 git push origin v0.3.0
-# GitHub Actions handles the rest!
+# GitHub Actions handles the rest via .github/workflows/python-publish.yml
+# Prerequisite: configure PyPI Trusted Publishing for this repository/workflow
 ```
 
 ## Troubleshooting
