@@ -1,14 +1,13 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools>=61,<77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "kkf"
-version = "0.2.0"
+version = "0.3.0"
 description = "KKF: Kernel Koopman Kalman Filter - A library for non-linear state estimation using kernel methods and Koopman operator theory"
 readme = "README.md"
-license = "MIT"
-license-files = ["LICENSE"]
+license = {text = "MIT"}
 authors = [
     {name = "Diego Olguin-Wende", email = "dolguin@dim.uchile.cl"}
 ]
@@ -76,6 +75,7 @@ Repository = "https://github.com/diegoolguinw/kkf.git"
 
 [tool.setuptools]
 include-package-data = true
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["."]
