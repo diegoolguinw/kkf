@@ -5,56 +5,39 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-A Python library for non-linear state estimation using Kernel-based Extended Dynamic Mode Decomposition (kEDMD) and Koopman operator theory.
+A Python library for nonlinear state estimation using kernel-based Extended
+Dynamic Mode Decomposition (kEDMD) and Koopman operator theory.
 
 ## What is KKF?
 
-KKF is a sophisticated filtering library that combines:
+The Kalman filter is optimal for linear systems but degrades when the dynamics
+are strongly nonlinear. KKF lifts the state into a feature space where the
+dynamics are approximately linear, runs a Kalman filter there, and maps the
+estimate back. The pieces are:
 
-- **Koopman Operator Theory**: Lifts nonlinear dynamics to a linear setting in feature space
-- **Kernel Methods**: Uses kernel functions for feature space approximation
-- **Kalman Filtering**: Applies optimal filtering in the lifted feature space
-- **Extended Dynamic Mode Decomposition**: Learns accurate linear approximations
-
-This enables accurate state estimation for highly nonlinear dynamical systems where traditional Kalman filters struggle.
+- **Koopman operator theory** — represent nonlinear dynamics as a linear
+  operator acting on observables.
+- **Kernel methods** — build the feature space from a kernel (RBF, Matérn, ...).
+- **kEDMD** — estimate the linear operator from samples of the dynamics.
+- **Kalman filtering** — propagate the mean and covariance in feature space.
 
 ## Features
 
-✨ **Core Capabilities**
 - Kernel Extended Dynamic Mode Decomposition (kEDMD)
-- Non-linear Kalman Filter implementation
-- Support for arbitrary dynamical systems
-- Multiple kernel function options (RBF, Matérn, etc.)
-- Robust state estimation with uncertainty quantification
-- Covariance propagation in both state and feature spaces
-
-📊 **High-Quality Implementation**
-- Type hints throughout the codebase
-- Comprehensive error handling
-- Numerical stability optimizations
-- Efficient NumPy/SciPy operations
-
-🧪 **Well-Tested**
-- 95+ unit and integration tests
-- Edge case coverage
-- Multi-platform CI/CD
-- Coverage reporting
-
-📚 **Comprehensive Documentation**
-- Detailed docstrings
-- 3 complete working examples
-- Parameter optimization guide
-- API documentation
+- A Kalman filter that operates in the lifted feature space
+- Works with arbitrary user-supplied dynamics `f` and observation `g`
+- Choice of kernel through scikit-learn's `gaussian_process.kernels`
+- Posterior covariance in both state and feature space, with optional
+  kernel-parameter optimization
+- Type hints throughout, and unit/integration tests run in CI
 
 ## Installation
-
-### Current Release
 
 ```bash
 pip install kkf
 ```
 
-### Development Version
+From source, for development:
 
 ```bash
 git clone https://github.com/diegoolguinw/kkf.git
@@ -62,47 +45,42 @@ cd kkf
 pip install -e ".[dev]"
 ```
 
-### Optional Dependencies
+Optional dependency groups:
 
 ```bash
-# For visualization examples
-pip install kkf[viz]
-
-# For development and testing
-pip install kkf[dev]
-
-# For building documentation
-pip install kkf[docs]
-
-# Install everything
-pip install kkf[all]
+pip install kkf[viz]    # plotting for the examples
+pip install kkf[dev]    # tests and linters
+pip install kkf[docs]   # documentation build
+pip install kkf[all]    # everything
 ```
 
 ## Quick Start
 
-Here's a complete example of using KKF to estimate states in a SIR (Susceptible-Infected-Recovered) epidemiological model (see also [`examples/02_sir_epidemic_model.py`](examples/02_sir_epidemic_model.py)):
+The example below estimates the states of an SIR (Susceptible-Infected-Recovered)
+epidemic model from noisy observations of the infected fraction. A runnable
+version is in [`examples/02_sir_epidemic_model.py`](examples/02_sir_epidemic_model.py).
 
 ```python
 import numpy as np
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern
 
-from KKF import systems, koopman, filter
+from KKF import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
 
-# Define SIR dynamics
+# SIR dynamics (discrete time)
 beta, gamma = 0.12, 0.04
 
-def f(x):  # State transition
+def f(x):  # state transition
     return x + np.array([
         -beta * x[0] * x[1],
         beta * x[0] * x[1] - gamma * x[1],
-        gamma * x[1]
+        gamma * x[1],
     ])
 
-def g(x):  # Observation function (infected population)
+def g(x):  # observe the infected fraction
     return np.array([x[1]])
 
-# Setup system
+# Dimensions and noise model
 nx, ny, n_features = 3, 1, 50
 X_dist = stats.dirichlet(alpha=np.ones(nx))
 dyn_dist = stats.multivariate_normal(mean=np.zeros(nx), cov=1e-5 * np.eye(nx))
@@ -110,12 +88,12 @@ obs_dist = stats.multivariate_normal(mean=np.zeros(ny), cov=1e-3 * np.eye(ny))
 
 system = DynamicalSystem(nx, ny, f, g, X_dist, dyn_dist, obs_dist, discrete_time=True)
 
-# Generate synthetic observations
+# Synthetic observations of the infected fraction
 np.random.seed(42)
 n_timesteps = 100
 y_obs = np.random.randn(n_timesteps, ny) * 0.1 + 0.1
 
-# Apply Koopman Kalman Filter
+# Build the Koopman operator and run the filter
 kernel = Matern(length_scale=1.0, nu=0.5)
 koopman_op = KoopmanOperator(kernel, system)
 
@@ -128,110 +106,85 @@ solution = apply_koopman_kalman_filter(
     initial_distribution=initial_prior,
     n_features=n_features,
     optimize=False,
-    noise_samples=100
+    noise_samples=100,
 )
 
-# Access results
-print(f"State estimates shape: {solution.x_plus.shape}")  # (n_timesteps, nx)
-print(f"State covariances shape: {solution.Px_plus.shape}")  # (n_timesteps, nx, nx)
-print(f"Mean estimation error: {solution.get_estimation_error().mean():.6f}")
+# Posterior estimates and covariances at each step
+print(solution.x_plus.shape)    # (n_timesteps, nx)
+print(solution.Px_plus.shape)   # (n_timesteps, nx, nx)
 ```
+
+`solution.x_plus` / `solution.x_minus` are the posterior / prior state estimates,
+and `solution.Px_plus` / `solution.Px_minus` the corresponding covariances.
 
 ## Examples
 
-The library includes three comprehensive examples:
+The [`examples/`](examples/) directory contains three runnable scripts:
 
-### 1. Basic Linear System (`examples/01_basic_linear_system.py`)
+- [`01_basic_linear_system.py`](examples/01_basic_linear_system.py) — a linear
+  system end to end: definition, synthetic data, filtering, confidence intervals.
+- [`02_sir_epidemic_model.py`](examples/02_sir_epidemic_model.py) — the SIR model
+  above, with partial observation and population estimates.
+- [`03_advanced_parameter_exploration.py`](examples/03_advanced_parameter_exploration.py)
+  — comparing kernels and feature dimensions.
 
-Introduces core concepts with a simple linear system:
-- System definition
-- Synthetic data generation
-- Filter application
-- Confidence interval visualization
+Run any of them with, e.g., `python examples/02_sir_epidemic_model.py`. See
+[examples/README.md](examples/README.md) for more.
 
-**Run:** `python examples/01_basic_linear_system.py`
-
-### 2. SIR Epidemic Model (`examples/02_sir_epidemic_model.py`)
-
-Real-world application to disease modeling:
-- Nonlinear dynamics
-- Partial state observation
-- Population dynamics estimation
-- Epidemic curve prediction
-
-**Run:** `python examples/02_sir_epidemic_model.py`
-
-### 3. Parameter Exploration (`examples/03_advanced_parameter_exploration.py`)
-
-Advanced hyperparameter tuning:
-- Multiple kernel comparison
-- Feature dimension optimization
-- Performance analysis
-- Systematic search strategy
-
-**Run:** `python examples/03_advanced_parameter_exploration.py`
-
-For more details, see [examples/README.md](examples/README.md)
-
-## Documentation
-
-### API Reference
+## API at a glance
 
 ```python
-# Core classes
-from KKF import DynamicalSystem, KoopmanOperator, KoopmanKalmanFilterSolution
-from KKF.filter import apply_koopman_kalman_filter
-
-# Utility functions
 from KKF import (
+    DynamicalSystem,
+    KoopmanOperator,
+    KoopmanKalmanFilterSolution,
+    apply_koopman_kalman_filter,
     compute_initial_covariance,
     compute_dynamics_covariance,
-    compute_observation_covariance
+    compute_observation_covariance,
 )
 ```
 
-### Theory
+The algorithm proceeds in three steps:
 
-The KKF algorithm works in three main steps:
+1. **Lift** the state into feature space using the kernel.
+2. **Approximate** the linear dynamics in that space with kEDMD.
+3. **Filter** with a Kalman filter in feature space, then project the estimate
+   and covariance back to the state coordinates.
 
-1. **Lifting**: Maps nonlinear states to a higher-dimensional feature space using kernel methods
-2. **Approximation**: Constructs a linear Koopman operator approximation via kEDMD
-3. **Filtering**: Applies Kalman filtering in the lifted space, then maps back to original coordinates
-
-### Key Parameters
+Main arguments to `apply_koopman_kalman_filter`:
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `n_features` | Dimension of lifted feature space | 50 |
-| `kernel` | Kernel function (RBF, Matérn, etc.) | RBF(1.0) |
-| `optimize` | Whether to optimize kernel parameters | False |
-| `noise_samples` | Monte Carlo samples for covariance | 100 |
+| `n_features` | Dimension of the lifted feature space | 50 |
+| `kernel` | Kernel passed to `KoopmanOperator` (RBF, Matérn, ...) | RBF(1.0) |
+| `optimize` | Optimize kernel parameters during fitting | False |
+| `noise_samples` | Monte Carlo samples for covariance propagation | 100 |
 
-## System Requirements
+## Requirements
 
-- Python 3.8 or higher
-- NumPy ≥ 1.20.0
-- SciPy ≥ 1.7.0
-- scikit-learn ≥ 1.0.0
-- Matplotlib ≥ 3.5.0 (optional, for visualization)
+- Python 3.8+
+- NumPy ≥ 1.20
+- SciPy ≥ 1.7
+- scikit-learn ≥ 1.0
+- Matplotlib ≥ 3.5 (optional, only for the example plots)
 
-## Advanced Usage
+## Common variations
 
-### Custom Kernel Functions
+Different kernels:
 
 ```python
 from sklearn.gaussian_process.kernels import (
-    RBF, Matern, ExpSineSquared, DotProduct, ConstantKernel
+    RBF, Matern, ExpSineSquared, ConstantKernel,
 )
 
-# Different kernel choices
-kernel1 = RBF(length_scale=1.0)
-kernel2 = Matern(length_scale=1.0, nu=2.5)
-kernel3 = ExpSineSquared(length_scale=1.0, periodicity=1.0)
-kernel4 = ConstantKernel(constant_value=1.0) * Matern(nu=1.5)
+kernel = RBF(length_scale=1.0)
+kernel = Matern(length_scale=1.0, nu=2.5)
+kernel = ExpSineSquared(length_scale=1.0, periodicity=1.0)
+kernel = ConstantKernel(1.0) * Matern(nu=1.5)
 ```
 
-### Manual Kernel Optimization
+Optimizing the kernel parameters:
 
 ```python
 solution = apply_koopman_kalman_filter(
@@ -239,79 +192,49 @@ solution = apply_koopman_kalman_filter(
     observations=y_obs,
     initial_distribution=initial_prior,
     n_features=50,
-    optimize=True,           # Enable kernel optimization
-    n_restarts_optimizer=20  # Number of optimization restarts
+    optimize=True,
+    n_restarts_optimizer=20,
 )
 ```
 
-### Extracting Uncertainty Estimates
+Confidence intervals from the posterior covariance:
 
 ```python
-# Posterior state covariance
-Px_plus = solution.Px_plus  # (n_timesteps, nx, nx)
-
-# Compute confidence intervals
-std_devs = np.sqrt(np.diagonal(Px_plus, axis1=1, axis2=2))
-ci_lower = solution.x_plus - 1.96 * std_devs
-ci_upper = solution.x_plus + 1.96 * std_devs
+std = np.sqrt(np.diagonal(solution.Px_plus, axis1=1, axis2=2))
+ci_lower = solution.x_plus - 1.96 * std
+ci_upper = solution.x_plus + 1.96 * std
 ```
 
 ## Testing
 
-Run the comprehensive test suite:
-
 ```bash
-# All tests
-pytest tests/
-
-# Verbose output
-pytest tests/ -v
-
-# Specific test file
-pytest tests/test_core.py
-
-# Skip slow tests
-pytest tests/ -m "not slow"
-
-# With coverage report
+pytest tests/                 # all tests
+pytest tests/ -v              # verbose
+pytest tests/ -m "not slow"   # skip slow tests
 pytest tests/ --cov=KKF --cov-report=html
 ```
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to:
-- Report bugs
-- Suggest features
-- Submit pull requests
-- Improve documentation
-
-## Code of Conduct
-
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating you agree to abide by its terms.
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). This project
+follows the [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Citation
 
-If you use KKF in your research, please cite:
-
 ```bibtex
 @software{kkf2024,
-  title={KKF: Kernel Koopman Kalman Filter},
-  author={Olguin-Wende, Diego},
-  year={2024},
-  url={https://github.com/diegoolguinw/kkf}
+  title  = {KKF: Kernel Koopman Kalman Filter},
+  author = {Olguin-Wende, Diego},
+  year   = {2024},
+  url    = {https://github.com/diegoolguinw/kkf}
 }
 ```
 
 ## License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
 
-## Changelog
+## Contact
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
-
-## Support & Contact
-
-- **Issues & Bug Reports**: [GitHub Issues](https://github.com/diegoolguinw/kkf/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/diegoolguinw/kkf/discussions)
-- **Email**: dolguin@dim.uchile.cl
+- Issues and bug reports: [GitHub Issues](https://github.com/diegoolguinw/kkf/issues)
+- Email: dolguin@dim.uchile.cl

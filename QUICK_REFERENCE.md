@@ -26,11 +26,11 @@ from KKF import (
     DynamicalSystem,
     KoopmanOperator,
     KoopmanKalmanFilterSolution,
+    apply_koopman_kalman_filter,
     compute_initial_covariance,
     compute_dynamics_covariance,
     compute_observation_covariance,
 )
-from KKF.applyKKF import apply_koopman_kalman_filter
 import numpy as np
 from scipy import stats
 from sklearn.gaussian_process.kernels import RBF, Matern
