@@ -23,7 +23,7 @@ Steps to reproduce the behavior:
 import numpy as np
 from scipy import stats
 from kkf import DynamicalSystem, KoopmanOperator
-from kkf.applyKKF import apply_koopman_kalman_filter
+from kkf.filter import apply_koopman_kalman_filter
 
 # Your minimal code that reproduces the issue
 ```

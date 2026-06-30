@@ -284,11 +284,11 @@ Describe the tests added or modified.
 kkf/
 ├── kkf/                    # Main package
 │   ├── __init__.py
-│   ├── DynamicalSystems.py
-│   ├── kEDMD.py
-│   ├── KKFsol.py
-│   ├── applyKKF.py
+│   ├── systems.py
+│   ├── koopman.py
 │   ├── covariances.py
+│   ├── solution.py
+│   ├── filter.py
 │   └── utils.py
 ├── tests/                  # Test suite
 │   ├── conftest.py

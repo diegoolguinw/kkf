@@ -4,6 +4,18 @@ All notable changes to the Kernel Koopman Kalman Filter (KKF) project are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25] - 2026-06-30
+
+### Changed
+- **BREAKING:** Renamed the import package from `KKF` to `kkf` (lowercase) to
+  match the PyPI distribution name and PEP 8. User code must update imports from
+  `from KKF import ...` to `from kkf import ...`.
+
+### Fixed
+- Corrected stale module names in the `CONTRIBUTING.md` project tree and fixed an
+  outdated `kkf.applyKKF` import in the bug-report issue template (the module is
+  `kkf.filter`).
+
 ## [0.2.0] - 2024-03-26
 
 ### Added

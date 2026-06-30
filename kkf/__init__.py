@@ -45,4 +45,4 @@ __all__ = [
     "compute_observation_covariance",
 ]
 
-__version__ = "0.24"
+__version__ = "0.25"
