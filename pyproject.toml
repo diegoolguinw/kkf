@@ -79,7 +79,7 @@ license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["KKF*"]
+include = ["kkf*"]
 
 [tool.black]
 line-length = 100
@@ -134,14 +134,14 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --strict-markers --cov=KKF --cov-report=term-missing --cov-report=html"
+addopts = "-v --strict-markers --cov=kkf --cov-report=term-missing --cov-report=html"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
 ]
 
 [tool.coverage.run]
-source = ["KKF"]
+source = ["kkf"]
 omit = [
     "*/tests/*",
     "*/site-packages/*",

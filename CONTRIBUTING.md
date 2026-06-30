@@ -66,11 +66,11 @@ pip install -e ".[dev,viz]"
 pytest tests/
 
 # Check formatting
-black --check KKF
-isort --check-only KKF
+black --check kkf
+isort --check-only kkf
 
 # Run linting
-flake8 KKF
+flake8 kkf
 ```
 
 ## Making Changes
@@ -93,12 +93,12 @@ We follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) with these tools:
 
 ```bash
 # Auto-format your code
-black KKF
-isort KKF
+black kkf
+isort kkf
 
 # Check for issues
-flake8 KKF
-mypy KKF --ignore-missing-imports
+flake8 kkf
+mypy kkf --ignore-missing-imports
 ```
 
 ### 3. Type Hints
@@ -215,8 +215,8 @@ Examples:
 ### 1. Before Submitting
 
 - [ ] Code passes all tests: `pytest tests/`
-- [ ] Code is formatted: `black KKF && isort KKF`
-- [ ] No linting errors: `flake8 KKF`
+- [ ] Code is formatted: `black kkf && isort kkf`
+- [ ] No linting errors: `flake8 kkf`
 - [ ] Type hints are present where applicable
 - [ ] Documentation is updated
 - [ ] A changelog entry is added
@@ -282,7 +282,7 @@ Describe the tests added or modified.
 
 ```
 kkf/
-├── KKF/                    # Main package
+├── kkf/                    # Main package
 │   ├── __init__.py
 │   ├── DynamicalSystems.py
 │   ├── kEDMD.py
@@ -323,7 +323,7 @@ kkf/
 # Minimal reproducible example
 import numpy as np
 from scipy import stats
-from KKF import DynamicalSystem, KoopmanOperator
+from kkf import DynamicalSystem, KoopmanOperator
 
 # System setup...
 # ... code that triggers the bug ...

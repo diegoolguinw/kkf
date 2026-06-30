@@ -35,22 +35,22 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 KKF --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 kkf --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings
-        flake8 KKF --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+        flake8 kkf --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
 
     - name: Format check with black
       run: |
-        black --check KKF
+        black --check kkf
 
     - name: Type check with mypy
       run: |
-        mypy KKF --ignore-missing-imports
+        mypy kkf --ignore-missing-imports
       continue-on-error: true
 
     - name: Test with pytest
       run: |
-        pytest tests/ -v --cov=KKF --cov-report=xml --cov-report=term-missing
+        pytest tests/ -v --cov=kkf --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
@@ -79,8 +79,8 @@ jobs:
 
     - name: Check import sorting with isort
       run: |
-        isort --check-only --diff KKF
+        isort --check-only --diff kkf
 
     - name: Run pylint
       run: |
-        pylint KKF --exit-zero
+        pylint kkf --exit-zero

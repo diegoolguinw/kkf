@@ -14,9 +14,9 @@ Main Components
 
 Quick Start
 -----------
->>> from KKF import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
+>>> from kkf import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
 >>> # or
->>> from KKF.filter import apply_koopman_kalman_filter
+>>> from kkf.filter import apply_koopman_kalman_filter
 """
 
 # Core classes and utilities

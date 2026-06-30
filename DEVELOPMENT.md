@@ -34,7 +34,7 @@ pip install -e ".[dev,viz]"
 pytest tests/ -v
 
 # Check formatting
-black --check KKF
+black --check kkf
 
 # Run examples (optional, requires matplotlib)
 python examples/01_basic_linear_system.py
@@ -56,23 +56,23 @@ git checkout -b feature/my-feature-name
 3. **Format and lint**
 ```bash
 # Format code
-black KKF
+black kkf
 
 # Sort imports
-isort KKF
+isort kkf
 
 # Check for lint issues
-flake8 KKF
+flake8 kkf
 
 # Type check
-mypy KKF --ignore-missing-imports
+mypy kkf --ignore-missing-imports
 ```
 
 4. **Write tests** in `tests/`
 ```python
 # Example test
 def test_my_feature():
-    from KKF import MyClass
+    from kkf import MyClass
     obj = MyClass()
     assert obj.my_method() == expected_result
 ```
@@ -83,7 +83,7 @@ def test_my_feature():
 pytest tests/
 
 # Run with coverage
-pytest tests/ --cov=KKF
+pytest tests/ --cov=kkf
 
 # Run specific test
 pytest tests/test_core.py::TestClass::test_method -v
@@ -109,7 +109,7 @@ git push origin feature/my-feature-name
 |------|---------|
 | `pyproject.toml` | Project configuration, dependencies, tool settings |
 | `setup.py` | Legacy setup (delegates to pyproject.toml) |
-| `KKF/__init__.py` | Package exports |
+| `kkf/__init__.py` | Package exports |
 | `tests/test_core.py` | Main test suite |
 | `tests/conftest.py` | Pytest configuration |
 | `.github/workflows/` | CI/CD pipelines |
@@ -231,9 +231,9 @@ def my_function(
 
 ### Adding a New Feature
 1. Create feature branch: `git checkout -b feature/description`
-2. Add code to appropriate module in `KKF/`
+2. Add code to appropriate module in `kkf/`
 3. Write tests in `tests/test_*.py`
-4. Run tests and format: `pytest` and `black KKF`
+4. Run tests and format: `pytest` and `black kkf`
 5. Update docstrings
 6. Create pull request
 
@@ -283,28 +283,28 @@ pytest tests/
 ### Formatting/Linting Issues
 ```bash
 # Auto-fix with black
-black KKF
+black kkf
 
 # Auto-fix imports
-isort KKF
+isort kkf
 
 # See what flake8 complains about
-flake8 KKF
+flake8 kkf
 
 # See type errors
-mypy KKF --ignore-missing-imports
+mypy kkf --ignore-missing-imports
 ```
 
 ### Import Errors
 ```bash
 # Verify installation
-python -c "import KKF; print(KKF.__file__)"
+python -c "import kkf; print(kkf.__file__)"
 
 # Check installed packages
-pip list | grep -E "KKF|numpy|scipy"
+pip list | grep -E "kkf|numpy|scipy"
 
 # Reinstall
-pip uninstall KKF
+pip uninstall kkf
 pip install -e "."
 ```
 
@@ -377,6 +377,6 @@ After setting up, read:
 1. [CONTRIBUTING.md](CONTRIBUTING.md) - Full contribution guidelines
 2. [examples/](examples/) - See how the library is used
 3. [tests/](tests/) - Understand the test structure
-4. [KKF/](KKF/) - Explore the actual implementation
+4. [kkf/](kkf/) - Explore the actual implementation
 
 Happy coding! 🚀

@@ -22,8 +22,8 @@ Steps to reproduce the behavior:
 ```python
 import numpy as np
 from scipy import stats
-from KKF import DynamicalSystem, KoopmanOperator
-from KKF.applyKKF import apply_koopman_kalman_filter
+from kkf import DynamicalSystem, KoopmanOperator
+from kkf.applyKKF import apply_koopman_kalman_filter
 
 # Your minimal code that reproduces the issue
 ```

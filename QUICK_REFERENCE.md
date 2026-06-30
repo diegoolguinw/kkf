@@ -22,7 +22,7 @@ pip install kkf[all]
 
 ### Import Core Components
 ```python
-from KKF import (
+from kkf import (
     DynamicalSystem,
     KoopmanOperator,
     KoopmanKalmanFilterSolution,
@@ -219,7 +219,7 @@ pytest tests/ -v
 pytest tests/test_core.py::TestDynamicalSystem -v
 
 # With coverage
-pytest tests/ --cov=KKF
+pytest tests/ --cov=kkf
 
 # Skip slow tests
 pytest tests/ -m "not slow"
@@ -235,21 +235,21 @@ pytest tests/ -s
 
 ```bash
 # Format code
-black KKF
+black kkf
 
 # Sort imports
-isort KKF
+isort kkf
 
 # Lint
-flake8 KKF
+flake8 kkf
 
 # Type check
-mypy KKF --ignore-missing-imports
+mypy kkf --ignore-missing-imports
 ```
 
 ## Common Issues
 
-### Import Error: "No module named 'KKF'"
+### Import Error: "No module named 'kkf'"
 ```bash
 # Reinstall in development mode
 pip install -e .
@@ -258,10 +258,10 @@ pip install -e .
 ### AttributeError: Module has no attribute
 ```bash
 # Check __init__.py exports
-cat KKF/__init__.py
+cat kkf/__init__.py
 
 # Import directly if needed
-from KKF.module_name import Class
+from kkf.module_name import Class
 ```
 
 ### Test failures
@@ -293,10 +293,10 @@ source venv/bin/activate  # or: venv\Scripts\activate on Windows
 pip install -e ".[dev,viz]"
 
 # Format and lint all
-black KKF && isort KKF && flake8 KKF
+black kkf && isort kkf && flake8 kkf
 
 # Run tests and check coverage
-pytest tests/ --cov=KKF --cov-report=html
+pytest tests/ --cov=kkf --cov-report=html
 
 # Run example
 python examples/01_basic_linear_system.py
@@ -353,7 +353,7 @@ kernel = ConstantKernel(1.0) * Matern(1.0, nu=1.5)
 ## Getting Help
 
 - **Documentation**: See README.md and examples/
-- **API Reference**: Check docstrings with `help(KKF.ClassName)`
+- **API Reference**: Check docstrings with `help(kkf.ClassName)`
 - **Examples**: Look at `examples/` for practical usage
 - **Issues**: File bugs on GitHub
 - **Discussions**: Start a GitHub discussion for questions

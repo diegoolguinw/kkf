@@ -5,7 +5,7 @@ import pytest
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern, RBF
 
-from KKF import (
+from kkf import (
     DynamicalSystem,
     create_additive_system,
     KoopmanOperator,
@@ -14,7 +14,7 @@ from KKF import (
     compute_dynamics_covariance,
     compute_observation_covariance,
 )
-from KKF.filter import apply_koopman_kalman_filter
+from kkf.filter import apply_koopman_kalman_filter
 
 
 class TestDynamicalSystem:

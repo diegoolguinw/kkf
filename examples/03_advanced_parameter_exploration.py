@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern, RBF, ExpSineSquared
 
-from KKF import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
+from kkf import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
 
 
 def evaluate_filter(system, kernel, n_features, observations, initial_dist, noise_samples=50):

@@ -65,7 +65,7 @@ import numpy as np
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern
 
-from KKF import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
+from kkf import DynamicalSystem, KoopmanOperator, apply_koopman_kalman_filter
 
 # SIR dynamics (discrete time)
 beta, gamma = 0.12, 0.04
@@ -134,7 +134,7 @@ Run any of them with, e.g., `python examples/02_sir_epidemic_model.py`. See
 ## API at a glance
 
 ```python
-from KKF import (
+from kkf import (
     DynamicalSystem,
     KoopmanOperator,
     KoopmanKalmanFilterSolution,
@@ -211,7 +211,7 @@ ci_upper = solution.x_plus + 1.96 * std
 pytest tests/                 # all tests
 pytest tests/ -v              # verbose
 pytest tests/ -m "not slow"   # skip slow tests
-pytest tests/ --cov=KKF --cov-report=html
+pytest tests/ --cov=kkf --cov-report=html
 ```
 
 ## Contributing

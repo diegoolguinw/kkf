@@ -5,7 +5,7 @@ import pytest
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern
 
-from KKF import DynamicalSystem, KoopmanOperator, create_additive_system
+from kkf import DynamicalSystem, KoopmanOperator, create_additive_system
 
 
 class TestEdgeCases:

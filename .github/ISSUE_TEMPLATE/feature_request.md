@@ -20,7 +20,7 @@ Describe how you would like the feature to work:
 
 ```python
 # Example of how the feature might be used:
-from KKF import ...
+from kkf import ...
 
 # Your proposed API or usage
 result = function_with_new_feature(...)
