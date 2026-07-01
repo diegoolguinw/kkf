@@ -20,9 +20,17 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx.ext.doctest",
     "numpydoc",
     "sphinx_gallery.gen_gallery",
+    "myst_parser",
 ]
+
+# myst-parser: let CHANGELOG.md be included as-is (no RST rewrite)
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 # autodoc/autosummary
 autosummary_generate = True
@@ -63,4 +71,11 @@ html_theme_options = {
     "github_url": "https://github.com/diegoolguinw/kkf",
     "show_toc_level": 2,
     "navigation_with_keys": False,
+    "use_edit_page_button": True,
+}
+html_context = {
+    "github_user": "diegoolguinw",
+    "github_repo": "kkf",
+    "github_version": "main",
+    "doc_path": "docs",
 }

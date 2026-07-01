@@ -49,6 +49,8 @@ class KoopmanKalmanFilterSolution:
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from kkf.solution import KoopmanKalmanFilterSolution
     >>> solution = KoopmanKalmanFilterSolution(
     ...     x_plus=np.array([1.0, 2.0]),
     ...     x_minus=np.array([0.9, 1.9]),

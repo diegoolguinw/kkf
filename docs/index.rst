@@ -19,8 +19,10 @@ Installation
    :maxdepth: 2
    :caption: Contents
 
+   theory
    api
    auto_examples/index
+   changelog
 
 Indices
 -------

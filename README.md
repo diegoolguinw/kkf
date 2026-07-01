@@ -2,6 +2,7 @@
 
 [![Tests](https://github.com/diegoolguinw/kkf/workflows/Tests%20&%20Code%20Quality/badge.svg)](https://github.com/diegoolguinw/kkf/actions)
 [![PyPI version](https://badge.fury.io/py/kkf.svg)](https://badge.fury.io/py/kkf)
+[![Docs](https://readthedocs.org/projects/kkf/badge/?version=latest)](https://kkf.readthedocs.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
