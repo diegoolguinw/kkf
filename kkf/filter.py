@@ -73,15 +73,19 @@ def apply_koopman_kalman_filter(
     Notes
     -----
     The algorithm consists of three main phases:
+
     1. Initialization:
+
        - Sets up initial states and covariances
        - Computes Koopman approximation
 
     2. Prediction Step:
+
        - Projects state forward using system dynamics
        - Updates covariances using Koopman operator
 
     3. Update Step:
+
        - Incorporates new measurements
        - Updates state and covariance estimates
 

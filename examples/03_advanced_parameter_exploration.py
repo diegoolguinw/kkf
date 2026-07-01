@@ -1,7 +1,8 @@
 """
-Advanced Example: Parameter Optimization with Grid Search
+Advanced: Parameter Optimization with Grid Search
+===================================================
 
-This example demonstrates how to optimize kernel parameters and 
+This example demonstrates how to optimize kernel parameters and
 explore the performance of the KKF with different configurations.
 """
 

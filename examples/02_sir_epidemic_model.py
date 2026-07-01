@@ -1,7 +1,8 @@
 """
-Example: Epidemic Model (SIR) with Koopman Kalman Filter
+SIR Epidemic Model
+===================
 
-This example demonstrates using KKF to estimate states in a 
+This example demonstrates using KKF to estimate states in a
 Susceptible-Infected-Recovered (SIR) epidemiological model.
 """
 

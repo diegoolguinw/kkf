@@ -1,5 +1,6 @@
 """
-Basic example: Simple Linear System with Koopman Kalman Filter
+Basic example: Simple Linear System
+====================================
 
 This example demonstrates the basic workflow of using the KKF library
 with a simple linear dynamical system.

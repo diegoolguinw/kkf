@@ -57,11 +57,11 @@ dev = [
     "pylint>=2.13.0",
 ]
 docs = [
-    "sphinx>=4.5.0",
-    "sphinx-rtd-theme>=1.0.0",
-    "nbsphinx>=0.8.8",
-    "ipython>=7.0.0",
-    "jupyter>=1.0.0",
+    "sphinx>=7.0.0",
+    "numpydoc>=1.6.0",
+    "pydata-sphinx-theme>=0.15.0",
+    "sphinx-gallery>=0.15.0",
+    "matplotlib>=3.5.0",
 ]
 all = [
     "kkf[viz,dev,docs]",
