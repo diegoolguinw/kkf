@@ -4,7 +4,8 @@ Defines classes and utilities for representing general dynamical systems
 with state transitions and measurement functions.
 """
 
-from typing import Any, Callable, Optional
+import warnings
+from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -47,13 +48,14 @@ class DynamicalSystem:
 
     Notes
     -----
-    The functions f and g should have the following signatures:
-    - f(x: ndarray, w: ndarray) -> ndarray
-    - g(x: ndarray, v: ndarray) -> ndarray
-    where:
-    - x is the state vector
-    - w is the process noise
-    - v is the measurement noise
+    The functions f and g model the *noise-free* dynamics and measurements;
+    the noise terms w and v are added separately (see ``dynamics`` and
+    ``measurements``). They should have the following signatures:
+    - f(x: ndarray) -> ndarray
+    - g(x: ndarray) -> ndarray
+    where x is the state vector. Both must also accept a batch of column
+    vectors of shape (nx, n_features), since ``KoopmanOperator`` evaluates
+    them on the full dictionary at once.
     """
 
     def __init__(
@@ -69,6 +71,8 @@ class DynamicalSystem:
     ) -> None:
         if nx <= 0:
             raise ValueError(f"State dimension nx must be positive, got {nx}")
+        if ny <= 0:
+            raise ValueError(f"Measurement dimension ny must be positive, got {ny}")
         self.nx = nx
         self.ny = ny
         self.f = f
@@ -177,9 +181,28 @@ def create_additive_system(
     x[k+1] = f(x[k]) + w[k]
     y[k] = g(x[k]) + v[k]
     where w and v are noise terms.
+
+    .. deprecated::
+        ``create_additive_system`` is deprecated and will be removed in a future
+        major release. The state-dependent noise distributions it builds are
+        incompatible with the covariance sampling used by
+        ``apply_koopman_kalman_filter`` (which calls ``dist_dyn.rvs(size=...)``
+        without a state argument). Construct a :class:`DynamicalSystem` directly
+        instead, providing ``f``/``g`` as the noise-free maps.
     """
-    new_f = lambda x: np.mean([f(x.reshape((len(x), 1)), dist_dyn.rvs(N_samples))], axis=1)
-    new_g = lambda x: np.mean([g(x.reshape((len(x), 1)), dist_obs.rvs(N_samples))], axis=1)
+    warnings.warn(
+        "create_additive_system is deprecated and will be removed in a future "
+        "release; it is incompatible with apply_koopman_kalman_filter. Build a "
+        "DynamicalSystem directly instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+    def new_f(x: NDArray[np.float64]) -> NDArray[np.float64]:
+        return np.mean([f(x.reshape((len(x), 1)), dist_dyn.rvs(N_samples))], axis=1)
+
+    def new_g(x: NDArray[np.float64]) -> NDArray[np.float64]:
+        return np.mean([g(x.reshape((len(x), 1)), dist_obs.rvs(N_samples))], axis=1)
 
     class DynDist:
         def __init__(self) -> None:

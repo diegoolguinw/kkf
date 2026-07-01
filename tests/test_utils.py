@@ -5,20 +5,33 @@ import pytest
 from scipy import stats
 from sklearn.gaussian_process.kernels import Matern
 
-from kkf import DynamicalSystem, KoopmanOperator, create_additive_system
+from kkf import (
+    DynamicalSystem,
+    KoopmanOperator,
+    compute_dynamics_covariance,
+    compute_initial_covariance,
+    create_additive_system,
+)
 
 
 class TestEdgeCases:
     """Test edge cases and error handling."""
 
     def test_zero_state_dimension_fails(self) -> None:
-        """Test that zero state dimension raises an error."""
-        with pytest.raises((ValueError, ZeroDivisionError)):
-            f = lambda x: x
-            g = lambda x: x
-            dist = stats.norm()
-            # This should ideally raise an error, but might not in current implementation
+        """Test that zero state dimension raises a ValueError."""
+        f = lambda x: x
+        g = lambda x: x
+        dist = stats.norm()
+        with pytest.raises(ValueError):
             DynamicalSystem(0, 1, f, g, dist, dist, dist, discrete_time=True)
+
+    def test_zero_measurement_dimension_fails(self) -> None:
+        """Test that zero measurement dimension raises a ValueError."""
+        f = lambda x: x
+        g = lambda x: x
+        dist = stats.norm()
+        with pytest.raises(ValueError):
+            DynamicalSystem(1, 0, f, g, dist, dist, dist, discrete_time=True)
 
     def test_single_state_dimension(self) -> None:
         """Test system with single state dimension."""
@@ -39,9 +52,7 @@ class TestEdgeCases:
         dist_noise = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
         dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
 
-        dyn = DynamicalSystem(
-            nx, ny, f, g, dist_X, dist_noise, dist_obs, discrete_time=True
-        )
+        dyn = DynamicalSystem(nx, ny, f, g, dist_X, dist_noise, dist_obs, discrete_time=True)
         assert dyn.nx == 10
         assert dyn.ny == 5
 
@@ -87,8 +98,8 @@ class TestEdgeCases:
         result = dyn.measurements(x, v_zero)
         np.testing.assert_array_almost_equal(result, g(x))
 
-    def test_additive_system_creation(self) -> None:
-        """Test create_additive_system function."""
+    def test_additive_system_creation_is_deprecated(self) -> None:
+        """create_additive_system emits a DeprecationWarning and still builds a system."""
         nx, ny = 2, 1
 
         def f(x, w):
@@ -101,16 +112,12 @@ class TestEdgeCases:
         dist_dyn = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
         dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
 
-        # This might fail or behave unexpectedly - testing edge case
-        try:
+        with pytest.warns(DeprecationWarning):
             add_sys = create_additive_system(
                 nx, ny, f, g, dist_X, dist_dyn, dist_obs, N_samples=10, discrete_time=True
             )
-            assert add_sys.nx == nx
-            assert add_sys.ny == ny
-        except Exception as e:
-            # Document if this fails
-            pytest.skip(f"create_additive_system not fully implemented: {e}")
+        assert add_sys.nx == nx
+        assert add_sys.ny == ny
 
 
 class TestNumericalStability:
@@ -196,6 +203,37 @@ class TestSampling:
         assert sample.ndim == 2
 
 
+class TestKoopmanOperatorAPI:
+    """Tests for the deprecation aliases and descriptive property aliases."""
+
+    @pytest.fixture
+    def fitted_koopman(self) -> KoopmanOperator:
+        nx, ny = 2, 1
+        f = lambda x: 0.9 * x
+        g = lambda x: x[0:1]
+        dist_X = stats.multivariate_normal(mean=np.zeros(nx), cov=np.eye(nx))
+        dist = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
+        dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
+        dyn = DynamicalSystem(nx, ny, f, g, dist_X, dist, dist_obs, discrete_time=True)
+        koop = KoopmanOperator(Matern(length_scale=1.0, nu=0.5), dyn)
+        koop.compute_edmd(n_features=8, optimize=False)
+        return koop
+
+    def test_descriptive_property_aliases(self, fitted_koopman: KoopmanOperator) -> None:
+        """Descriptive properties mirror the single-letter attributes."""
+        assert fitted_koopman.koopman_matrix is fitted_koopman.U
+        assert fitted_koopman.gram_matrix is fitted_koopman.G
+        assert fitted_koopman.output_matrix is fitted_koopman.C
+        assert fitted_koopman.state_matrix is fitted_koopman.B
+        assert fitted_koopman.dictionary is fitted_koopman.X
+        assert fitted_koopman.feature_map is fitted_koopman.phi
+
+    def test_opt_kernel_is_deprecated_alias(self, fitted_koopman: KoopmanOperator) -> None:
+        """opt_kernel warns and delegates to optimize_kernel."""
+        with pytest.warns(DeprecationWarning):
+            fitted_koopman.opt_kernel(fitted_koopman.X, n_restarts_optimizer=0)
+
+
 class TestKoopmanOperatorEdgeCases:
     """Edge case tests for KoopmanOperator."""
 
@@ -216,6 +254,27 @@ class TestKoopmanOperatorEdgeCases:
 
         koop.compute_edmd(n_features=1, optimize=False)
         assert koop.get_feature_dimension() == 1
+
+    def test_single_feature_covariances_are_2d(self) -> None:
+        """Covariance helpers must return 2D matrices even with a single feature."""
+        nx, ny = 2, 1
+        f = lambda x: 0.9 * x
+        g = lambda x: x[0:1]
+
+        dist_X = stats.multivariate_normal(mean=np.zeros(nx), cov=np.eye(nx))
+        dist = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
+        dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
+
+        dyn = DynamicalSystem(nx, ny, f, g, dist_X, dist, dist_obs, discrete_time=True)
+        koop = KoopmanOperator(Matern(length_scale=1.0, nu=0.5), dyn)
+        koop.compute_edmd(n_features=1, optimize=False)
+
+        x = np.array([0.5, 0.5])
+        cov_init = compute_initial_covariance(x, 1, dist_X, koop, n_samples=50)
+        cov_dyn = compute_dynamics_covariance(x, 1, dyn, koop, n_samples=50)
+
+        assert cov_init.shape == (1, 1)
+        assert cov_dyn.shape == (1, 1)
 
     def test_many_features(self) -> None:
         """Test Koopman operator with many features."""

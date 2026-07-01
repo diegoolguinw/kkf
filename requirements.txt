@@ -1,4 +1,6 @@
+# Core runtime dependencies (kept in sync with pyproject.toml [project.dependencies]).
+# For development, prefer:  pip install -e ".[dev]"
+# matplotlib is optional and only needed for the example plots:  pip install kkf[viz]
 numpy>=1.20.0
 scipy>=1.7.0
 scikit-learn>=1.0.0
-matplotlib>=3.5.0

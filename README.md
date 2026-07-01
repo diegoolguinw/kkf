@@ -156,10 +156,16 @@ Main arguments to `apply_koopman_kalman_filter`:
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `n_features` | Dimension of the lifted feature space | 50 |
-| `kernel` | Kernel passed to `KoopmanOperator` (RBF, Matérn, ...) | RBF(1.0) |
-| `optimize` | Optimize kernel parameters during fitting | False |
+| `koopman_operator` | A `KoopmanOperator` built from your kernel and system | required |
+| `observations` | Measurements, shape `(n_timesteps, n_outputs)` | required |
+| `initial_distribution` | Prior over the initial state (a `scipy.stats` distribution) | required |
+| `n_features` | Dimension of the lifted feature space | required |
+| `optimize` | Optimize kernel parameters during fitting | `False` |
+| `n_restarts_optimizer` | Optimizer restarts (used only when `optimize=True`) | 10 |
 | `noise_samples` | Monte Carlo samples for covariance propagation | 100 |
+
+The kernel is not passed here — choose it when constructing the
+`KoopmanOperator` (see [Common variations](#common-variations) below).
 
 ## Requirements
 
