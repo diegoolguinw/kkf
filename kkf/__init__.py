@@ -46,4 +46,4 @@ __all__ = [
 # NOTE: `create_additive_system` is intentionally omitted from __all__ — it is
 # deprecated (see kkf.systems). It remains importable from `kkf.systems` for now.
 
-__version__ = "0.25"
+__version__ = "1.0"
