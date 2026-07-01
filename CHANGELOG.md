@@ -103,7 +103,7 @@ Ideas under consideration, not commitments:
 - Extended and Unscented Kalman Filter variants
 - Adaptive noise estimation and multi-rate filtering
 - GPU acceleration and benchmarking
-- A stable 1.0 API with expanded documentation and examples
+- Expanded documentation and examples on top of the stable 1.0 API
 
 ## Release process
 
