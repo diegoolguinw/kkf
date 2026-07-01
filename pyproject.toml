@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kkf"
-version = "0.25"
+version = "1.0"
 description = "KKF: Kernel Koopman Kalman Filter - A library for non-linear state estimation using kernel methods and Koopman operator theory"
 readme = "README.md"
 license = {text = "MIT"}
@@ -21,7 +21,7 @@ keywords = [
     "filtering"
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "Natural Language :: English",

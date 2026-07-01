@@ -4,7 +4,7 @@ All notable changes to the Kernel Koopman Kalman Filter (KKF) project are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0] - 2026-06-30
 
 ### Added
 - `reg` parameter on `KoopmanOperator.compute_edmd` and `apply_koopman_kalman_filter`:
