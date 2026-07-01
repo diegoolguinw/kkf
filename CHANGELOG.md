@@ -4,6 +4,39 @@ All notable changes to the Kernel Koopman Kalman Filter (KKF) project are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `reg` parameter on `KoopmanOperator.compute_edmd` and `apply_koopman_kalman_filter`:
+  Tikhonov (jitter) regularization for the Gram-matrix inversion, improving numerical
+  stability on ill-conditioned kernels. Defaults to `1e-10` (previous behavior ≈ no jitter).
+- `KoopmanOperator.optimize_kernel`: clearer name for the former `opt_kernel`.
+- Descriptive read-only properties on `KoopmanOperator` (`koopman_matrix`, `gram_matrix`,
+  `output_matrix`, `state_matrix`, `dictionary`, `feature_map`) aliasing the single-letter
+  attributes `U`, `G`, `C`, `B`, `X`, `phi` for discoverability.
+
+### Changed
+- **BEHAVIOR:** The default of `optimize` is now `False` in both
+  `apply_koopman_kalman_filter` and `KoopmanOperator.compute_edmd` (was `True`). The fast,
+  no-optimization path is now the default; pass `optimize=True` to fit kernel
+  hyperparameters as before.
+
+### Deprecated
+- `create_additive_system` now emits a `DeprecationWarning` and was removed from the
+  top-level `__all__` (still importable). It is incompatible with the filter's covariance
+  sampling; build a `DynamicalSystem` directly instead.
+- `KoopmanOperator.opt_kernel` is a deprecated alias for `optimize_kernel`.
+
+### Fixed
+- Covariance helpers (`compute_initial_covariance`, `compute_dynamics_covariance`) now
+  always return 2D matrices, even with a single feature (`n_features=1`), matching
+  `compute_observation_covariance`.
+- `DynamicalSystem` now validates that the measurement dimension `ny` is positive,
+  mirroring the existing `nx` check.
+
+### Removed
+- Deleted the empty, unused `kkf/utils.py` module.
+
 ## [0.25] - 2026-06-30
 
 ### Changed

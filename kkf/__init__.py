@@ -38,11 +38,12 @@ __all__ = [
     "KoopmanOperator",
     "KoopmanKalmanFilterSolution",
     # Functions
-    "create_additive_system",
     "apply_koopman_kalman_filter",
     "compute_initial_covariance",
     "compute_dynamics_covariance",
     "compute_observation_covariance",
 ]
+# NOTE: `create_additive_system` is intentionally omitted from __all__ — it is
+# deprecated (see kkf.systems). It remains importable from `kkf.systems` for now.
 
 __version__ = "0.25"

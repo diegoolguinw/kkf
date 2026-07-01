@@ -5,7 +5,7 @@ filter outputs.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -124,7 +124,7 @@ class KoopmanKalmanFilterSolution:
         trace_plus = np.trace(self.Px_plus)
         return (trace_minus - trace_plus) / trace_minus if trace_minus != 0 else 0.0
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, NDArray[np.float64]]:
         """
         Convert the solution to a dictionary format.
 

@@ -4,7 +4,7 @@ Combines Koopman operator theory with Kalman filtering for nonlinear
 state estimation.
 """
 
-from typing import Any, Callable, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Tuple
 
 import numpy as np
 from numpy.linalg import pinv
@@ -17,15 +17,20 @@ from .covariances import (
 )
 from .solution import KoopmanKalmanFilterSolution
 
+if TYPE_CHECKING:
+    from .koopman import KoopmanOperator
+    from .systems import DynamicalSystem
+
 
 def apply_koopman_kalman_filter(
-    koopman_operator: Any,
+    koopman_operator: "KoopmanOperator",
     observations: NDArray[np.float64],
     initial_distribution: Any,
     n_features: int,
-    optimize: bool = True,
+    optimize: bool = False,
     n_restarts_optimizer: int = 10,
     noise_samples: int = 100,
+    reg: float = 1e-10,
 ) -> KoopmanKalmanFilterSolution:
     """
     Implementation of the Koopman-Kalman Filter algorithm.
@@ -52,11 +57,13 @@ def apply_koopman_kalman_filter(
     n_features : int
         Number of features in the lifted space.
     optimize : bool, optional
-        Whether to optimize the kernel parameters. Default is True.
+        Whether to optimize the kernel parameters. Default is False.
     n_restarts_optimizer : int, optional
         Number of restarts for kernel optimization. Default is 10.
     noise_samples : int, optional
         Number of samples for noise covariance estimation. Default is 100.
+    reg : float, optional
+        Jitter regularization for the Koopman Gram-matrix inversion. Default is 1e-10.
 
     Returns
     -------
@@ -82,7 +89,7 @@ def apply_koopman_kalman_filter(
     feature space (z), maintaining estimates and covariances in both spaces.
     """
     # Compute Koopman approximation
-    koopman_operator.compute_edmd(n_features, optimize, n_restarts_optimizer)
+    koopman_operator.compute_edmd(n_features, optimize, n_restarts_optimizer, reg)
     dynamical_system = koopman_operator.dynamical_system
 
     # Extract system and Koopman components
@@ -91,7 +98,7 @@ def apply_koopman_kalman_filter(
     U, B, C = koopman_operator.U, koopman_operator.B, koopman_operator.C
     phi = koopman_operator.phi
 
-    ### Initialization ###
+    # --- Initialization ---
     mean_val = initial_distribution.mean  # Initial state estimate
     x0 = np.atleast_1d(np.asarray(mean_val() if callable(mean_val) else mean_val))
     z0 = phi(x0)  # Initial state in feature space
@@ -122,7 +129,7 @@ def apply_koopman_kalman_filter(
     )
     Pz_minus[0, :, :], Pz_plus[0, :, :] = initial_covariance, initial_covariance
 
-    ### Main Filter Loop ###
+    # --- Main filter loop ---
     for t in range(1, n_timesteps):
         # Prediction Step
         x_minus[t], z_minus[t], Pz_minus[t] = _prediction_step(
@@ -178,8 +185,8 @@ def _prediction_step(
     state_dynamics: Callable,
     phi: Callable,
     U: NDArray[np.float64],
-    dynamical_system: Any,
-    koopman_operator: Any,
+    dynamical_system: "DynamicalSystem",
+    koopman_operator: "KoopmanOperator",
     n_features: int,
     noise_samples: int,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
@@ -190,9 +197,7 @@ def _prediction_step(
     )
 
     # Predict states
-    x_pred = state_dynamics(
-        x_prev,
-    )
+    x_pred = state_dynamics(x_prev)
     z_pred = phi(x_pred)
 
     # Predict covariance
@@ -209,7 +214,7 @@ def _update_step(
     measurement_model: Callable,
     C: NDArray[np.float64],
     B: NDArray[np.float64],
-    dynamical_system: Any,
+    dynamical_system: "DynamicalSystem",
     noise_samples: int,
 ) -> Tuple[
     NDArray[np.float64],

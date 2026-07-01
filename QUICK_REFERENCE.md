@@ -341,7 +341,6 @@ kernel = ConstantKernel(1.0) * Matern(1.0, nu=1.5)
 - [Examples](examples/)
 - [Development Setup](DEVELOPMENT.md)
 - [Change Log](CHANGELOG.md)
-- [Improvements Summary](IMPROVEMENTS_SUMMARY.md)
 
 ## Performance Tips
 

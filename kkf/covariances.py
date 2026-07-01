@@ -1,4 +1,4 @@
-from typing import Any, Callable, Union
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -54,8 +54,8 @@ def compute_initial_covariance(
     for i in range(n_samples):
         transformed_samples[i, :] = koopman_operator.phi(samples[i, :])
 
-    # Compute and return covariance matrix
-    return np.cov(transformed_samples, rowvar=False)
+    # Compute and return covariance matrix (ensure 2D even for a single feature)
+    return np.atleast_2d(np.cov(transformed_samples, rowvar=False))
 
 
 def compute_dynamics_covariance(
@@ -107,8 +107,8 @@ def compute_dynamics_covariance(
         state_evolution = dynamics.dynamics(x, noise_samples[i, :])
         transformed_samples[i, :] = koopman_operator.phi(state_evolution)
 
-    # Compute and return covariance matrix
-    return np.cov(transformed_samples, rowvar=False)
+    # Compute and return covariance matrix (ensure 2D even for a single feature)
+    return np.atleast_2d(np.cov(transformed_samples, rowvar=False))
 
 
 def compute_observation_covariance(

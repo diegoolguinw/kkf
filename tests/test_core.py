@@ -3,18 +3,17 @@
 import numpy as np
 import pytest
 from scipy import stats
-from sklearn.gaussian_process.kernels import Matern, RBF
+from sklearn.gaussian_process.kernels import RBF, Matern
 
 from kkf import (
     DynamicalSystem,
-    create_additive_system,
-    KoopmanOperator,
     KoopmanKalmanFilterSolution,
-    compute_initial_covariance,
+    KoopmanOperator,
+    apply_koopman_kalman_filter,
     compute_dynamics_covariance,
+    compute_initial_covariance,
     compute_observation_covariance,
 )
-from kkf.filter import apply_koopman_kalman_filter
 
 
 class TestDynamicalSystem:
@@ -30,9 +29,7 @@ class TestDynamicalSystem:
         dist_dyn = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
         dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
 
-        return DynamicalSystem(
-            nx, ny, f, g, dist_X, dist_dyn, dist_obs, discrete_time=True
-        )
+        return DynamicalSystem(nx, ny, f, g, dist_X, dist_dyn, dist_obs, discrete_time=True)
 
     def test_dynamical_system_initialization(self, simple_system: DynamicalSystem) -> None:
         """Test DynamicalSystem initialization."""
@@ -75,9 +72,7 @@ class TestDynamicalSystem:
         g = lambda x: x
         dist = stats.norm()
 
-        system = DynamicalSystem(
-            nx, ny, f, g, dist, dist, dist, discrete_time=False
-        )
+        system = DynamicalSystem(nx, ny, f, g, dist, dist, dist, discrete_time=False)
         assert system.discrete_time is False
 
 
@@ -95,9 +90,7 @@ class TestCovarianceFunctions:
         dist_dyn = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
         dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
 
-        dyn_sys = DynamicalSystem(
-            nx, ny, f, g, dist_X, dist_dyn, dist_obs, discrete_time=True
-        )
+        dyn_sys = DynamicalSystem(nx, ny, f, g, dist_X, dist_dyn, dist_obs, discrete_time=True)
 
         kernel = Matern(length_scale=1.0, nu=0.5)
         koopman = KoopmanOperator(kernel, dyn_sys)
@@ -169,9 +162,7 @@ class TestKoopmanOperator:
         dist_dyn = stats.multivariate_normal(mean=np.zeros(nx), cov=0.01 * np.eye(nx))
         dist_obs = stats.multivariate_normal(mean=np.zeros(ny), cov=0.01 * np.eye(ny))
 
-        dyn_sys = DynamicalSystem(
-            nx, ny, f, g, dist_X, dist_dyn, dist_obs, discrete_time=True
-        )
+        dyn_sys = DynamicalSystem(nx, ny, f, g, dist_X, dist_dyn, dist_obs, discrete_time=True)
 
         kernel = Matern(length_scale=1.0, nu=0.5)
         return KoopmanOperator(kernel, dyn_sys)
@@ -192,15 +183,11 @@ class TestKoopmanOperator:
         assert koopman_setup.U is not None
         assert koopman_setup.X.shape[0] == n_features
 
-    def test_feature_dimension_before_compute(
-        self, koopman_setup: KoopmanOperator
-    ) -> None:
+    def test_feature_dimension_before_compute(self, koopman_setup: KoopmanOperator) -> None:
         """Test get_feature_dimension returns None before EDMD."""
         assert koopman_setup.get_feature_dimension() is None
 
-    def test_feature_dimension_after_compute(
-        self, koopman_setup: KoopmanOperator
-    ) -> None:
+    def test_feature_dimension_after_compute(self, koopman_setup: KoopmanOperator) -> None:
         """Test get_feature_dimension after EDMD."""
         n_features = 10
         koopman_setup.compute_edmd(n_features, optimize=False)
@@ -218,7 +205,7 @@ class TestKoopmanOperator:
 
 
 class TestKoopmanKalmanFilterSolution:
-    """Tests for KoopmanKalmanFilterSolution. """
+    """Tests for KoopmanKalmanFilterSolution."""
 
     @pytest.fixture
     def solution(self):
@@ -238,9 +225,7 @@ class TestKoopmanKalmanFilterSolution:
             x_plus, x_minus, Pz_plus, Pz_minus, Px_plus, Px_minus, S, K
         )
 
-    def test_solution_initialization(
-        self, solution: KoopmanKalmanFilterSolution
-    ) -> None:
+    def test_solution_initialization(self, solution: KoopmanKalmanFilterSolution) -> None:
         """Test solution initialization."""
         assert solution.x_plus.shape[0] == 10
         assert solution.x_plus.shape[1] == 2
@@ -280,7 +265,9 @@ class TestIntegration:
         beta, gamma = 0.12, 0.04
 
         def f(x):
-            return x + np.array([-beta * x[0] * x[1], beta * x[0] * x[1] - gamma * x[1], gamma * x[1]])
+            return x + np.array(
+                [-beta * x[0] * x[1], beta * x[0] * x[1] - gamma * x[1], gamma * x[1]]
+            )
 
         def g(x):
             return np.array([x[1]])
@@ -315,9 +302,7 @@ class TestIntegration:
         d0 = stats.multivariate_normal(mean=x0_prior, cov=0.1 * np.eye(3))
 
         # Apply filter
-        sol = apply_koopman_kalman_filter(
-            Koop, y, d0, N, optimize=False, noise_samples=50
-        )
+        sol = apply_koopman_kalman_filter(Koop, y, d0, N, optimize=False, noise_samples=50)
 
         # Basic assertions
         assert sol.x_plus.shape == (iters, nx)

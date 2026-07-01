@@ -4,14 +4,14 @@ Implements kernel-based Extended Dynamic Mode Decomposition (kEDMD)
 for computing Koopman operator approximations.
 """
 
+import warnings
 from typing import Callable, Optional
 
 import numpy as np
 from numpy.typing import NDArray
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import Kernel
 
-from .systems import DynamicalSystem, create_additive_system
+from .systems import DynamicalSystem
 
 
 class KoopmanOperator:
@@ -63,7 +63,11 @@ class KoopmanOperator:
         self.B: Optional[NDArray[np.float64]] = None
 
     def compute_edmd(
-        self, n_features: int, optimize: bool = True, n_restarts_optimizer: int = 10
+        self,
+        n_features: int,
+        optimize: bool = False,
+        n_restarts_optimizer: int = 10,
+        reg: float = 1e-10,
     ) -> None:
         """
         Compute the kernel-based Extended Dynamic Mode Decomposition (kEDMD).
@@ -78,9 +82,15 @@ class KoopmanOperator:
         optimize : bool
             Whether to optimize the kernel function. If True, the method will
             optimize the kernel function using Gaussian Process Regression. If False,
-            the provided kernel function will be used without optimization. Default is True.
+            the provided kernel function will be used without optimization. Default is False
+            (fast; enable it explicitly to fit kernel hyperparameters).
         n_restarts_optimizer : int
             Number of restarts for the optimizer. If optimize is False, will be ignored. Default is 10.
+        reg : float
+            Tikhonov (jitter) regularization added to the diagonal of the Gram matrix
+            before inversion, scaled by its mean diagonal. Kernel Gram matrices are often
+            ill-conditioned; a small positive value keeps the inversion numerically stable.
+            Increase it if you see unstable estimates. Default is 1e-10.
 
         Notes
         -----
@@ -99,14 +109,15 @@ class KoopmanOperator:
 
         # Optimize kernel function
         if optimize:
-            self.opt_kernel(X=self.X, n_restarts_optimizer=n_restarts_optimizer)
+            self.optimize_kernel(X=self.X, n_restarts_optimizer=n_restarts_optimizer)
 
         # Define feature map
         self.phi = lambda x: self.kernel_function(x, self.X)[0]
 
-        # Compute Gram matrix
+        # Compute Gram matrix, regularizing the diagonal to keep the inversion stable
         self.G = self.kernel_function(self.X, self.X)
-        G_inv = np.linalg.inv(self.G)
+        jitter = reg * np.mean(np.diag(self.G))
+        G_inv = np.linalg.inv(self.G + jitter * np.eye(self.G.shape[0]))
 
         # Compute Koopman operator approximation
         next_states = f(self.X.T).T
@@ -127,7 +138,7 @@ class KoopmanOperator:
         """
         return self.X.shape[0] if self.X is not None else None
 
-    def opt_kernel(self, X: NDArray[np.float64], n_restarts_optimizer: int = 10) -> None:
+    def optimize_kernel(self, X: NDArray[np.float64], n_restarts_optimizer: int = 10) -> None:
         """
         Optimize the kernel function for the Koopman operator.
 
@@ -153,3 +164,50 @@ class KoopmanOperator:
 
         # Update with optimal kernel
         self.kernel_function = gp.kernel_
+
+    def opt_kernel(self, X: NDArray[np.float64], n_restarts_optimizer: int = 10) -> None:
+        """Deprecated alias for :meth:`optimize_kernel`.
+
+        .. deprecated::
+            Use :meth:`optimize_kernel` instead. This alias will be removed in a
+            future major release.
+        """
+        warnings.warn(
+            "KoopmanOperator.opt_kernel is deprecated; use optimize_kernel instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.optimize_kernel(X=X, n_restarts_optimizer=n_restarts_optimizer)
+
+    # Descriptive, discoverable aliases for the single-letter matrices computed by
+    # ``compute_edmd``. The short names (U, G, C, B, X, phi) are kept for backward
+    # compatibility and mathematical convention.
+    @property
+    def koopman_matrix(self) -> Optional[NDArray[np.float64]]:
+        """Koopman operator approximation (alias of ``U``)."""
+        return self.U
+
+    @property
+    def gram_matrix(self) -> Optional[NDArray[np.float64]]:
+        """Kernel Gram matrix (alias of ``G``)."""
+        return self.G
+
+    @property
+    def output_matrix(self) -> Optional[NDArray[np.float64]]:
+        """Feature-to-output matrix (alias of ``C``)."""
+        return self.C
+
+    @property
+    def state_matrix(self) -> Optional[NDArray[np.float64]]:
+        """Feature-to-state matrix (alias of ``B``)."""
+        return self.B
+
+    @property
+    def dictionary(self) -> Optional[NDArray[np.float64]]:
+        """Dictionary of sampled states (alias of ``X``)."""
+        return self.X
+
+    @property
+    def feature_map(self) -> Optional[Callable]:
+        """Feature map function (alias of ``phi``)."""
+        return self.phi
